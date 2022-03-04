@@ -8,8 +8,8 @@ First, `cd` into this folder, then run Cmake to generate the Makefile. If you ev
 cmake ..
 ```
 
-To compile and run run, replacing "sfml-template" with your `ProjectName` in `CmakeLists.txt`:
+To compile and run:
 
 ```SH
-make && ./sfml-template
+make && ./elnutris
 ```
