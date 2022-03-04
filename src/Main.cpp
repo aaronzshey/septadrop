@@ -88,6 +88,7 @@ int main()
 
 		window.clear();
 
+		// Horizontal movement
 		int movement = 0;
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
 			movement--;
@@ -114,6 +115,7 @@ int main()
 			block.position.x += movement;
 		}
 
+		// Drawing block and land checking
 		shape.setFillColor(block.type->tile_type->color);
 		bool landed = false;
 		for (int y = 0; y < 2; y++) {
@@ -130,6 +132,8 @@ int main()
 				window.draw(shape);
 			}
 		}
+
+		// Landing (transfering block to grid and reinitializing)
 		if (landed) {
 			for (int y = 0; y < 2; y++) {
 				for (int x = 0; x < 4; x++) {
@@ -141,12 +145,12 @@ int main()
 					grid[global_y][global_x] = block.type->tile_type;
 				}
 			}
-			landed = false;
 			block = Block();
 		} else {
 			block.position.y++;
 		}
 
+		// Drawing grid
 		for (int y = 0; y < GRID_HEIGHT; y++) {
 			for (int x = 0; x < GRID_WIDTH; x++) {
 				auto tile_type = grid[y][x];
