@@ -88,11 +88,30 @@ int main()
 
 		window.clear();
 
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-			block.position.x--;
+		int movement = 0;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+			movement--;
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+			movement++;
+		bool obstructed = false;
+		if (movement != 0) {
+			for (int y = 0; y < 2; y++) {
+				for (int x = 0; x < 4; x++) {
+					if (!block.type->grid[y][x]) {
+						continue;
+					}
+					int global_x = x + block.position.x;
+					int global_y = y + block.position.y;
+					if (global_x <= 0 || global_x > GRID_WIDTH || grid[global_y][global_x + movement]) {
+						obstructed = true;
+						goto after_loop;
+					}
+				}
+			}
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-			block.position.x++;
+		after_loop:
+		if (!obstructed) {
+			block.position.x += movement;
 		}
 
 		shape.setFillColor(block.type->tile_type->color);
