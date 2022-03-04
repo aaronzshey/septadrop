@@ -1,3 +1,4 @@
+#include <SFML/Window/Keyboard.hpp>
 #define WINDOW_WIDTH 400
 #define WINDOW_HEIGHT 400
 
@@ -82,11 +83,18 @@ int main()
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed)
-				window.close();
+			switch (event.type) {
+				case sf::Event::Closed:
+					window.close();
+				default:
+					break;
+			}
 		}
 
 		window.clear();
+
+		// Fast forward
+		window.setFramerateLimit(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) ? 16 : 8);
 
 		// Horizontal movement
 		int movement = 0;
@@ -116,27 +124,30 @@ int main()
 		}
 
 		// Snapping
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-			while (true) {
-				for (int y = 0; y < 2; y++) {
-					for (int x = 0; x < 4; x++) {
-						if (!block.type->grid[y][x]) {
-							continue;
-						}
-						int global_x = x + block.position.x;
-						int global_y = y + block.position.y;
-						if (global_y == GRID_HEIGHT - 1 || grid[global_y + 1][global_x] != nullptr) {
-							goto after_snap_loop;
-						}
+		int snap_y = block.position.y;
+		while (true) {
+			for (int y = 0; y < 2; y++) {
+				for (int x = 0; x < 4; x++) {
+					if (!block.type->grid[y][x]) {
+						continue;
+					}
+					int global_x = x + block.position.x;
+					int global_y = y + snap_y;
+					if (global_y == GRID_HEIGHT - 1 || grid[global_y + 1][global_x] != nullptr) {
+						goto after_snap_loop;
 					}
 				}
-				block.position.y++;
 			}
+			snap_y++;
 		}
 		after_snap_loop:
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+			block.position.y = snap_y;
+		}
 
 		// Drawing block and land checking
-		shape.setFillColor(block.type->tile_type->color);
+		sf::Color ghost_color = block.type->tile_type->color;
+		ghost_color.a = 64;
 		bool landed = false;
 		for (int y = 0; y < 2; y++) {
 			for (int x = 0; x < 4; x++) {
@@ -145,10 +156,15 @@ int main()
 				}
 				int global_x = x + block.position.x;
 				int global_y = y + block.position.y;
+				int global_snap_y = snap_y + y;
 				if (global_y == GRID_HEIGHT - 1 || grid[global_y + 1][global_x] != nullptr) {
 					landed = true;
 				}
+				shape.setFillColor(block.type->tile_type->color);
 				shape.setPosition(global_x * shape_width, global_y * shape_height);
+				window.draw(shape);
+				shape.setFillColor(ghost_color);
+				shape.setPosition(global_x * shape_width, global_snap_y * shape_height);
 				window.draw(shape);
 			}
 		}
