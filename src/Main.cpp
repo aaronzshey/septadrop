@@ -49,11 +49,12 @@ int main()
 	BlockType z(&cyan, {{{{1, 1, 0, 0}}, {{0, 1, 1, 0}}}});
 	BlockType block_types[] = {i, j, l, o, s, t, z};
 
-	auto current_block = &block_types[rand() % 7];;
-	auto current_block_position = sf::Vector2i(0, 0);
-
 	#define GRID_WIDTH 20
 	#define GRID_HEIGHT 20
+	
+	auto current_block = &block_types[rand() % 7];;
+	auto current_block_position = sf::Vector2i(GRID_WIDTH / 2 - 2, 0);
+
 	TileType* grid[GRID_HEIGHT][GRID_WIDTH] = { nullptr };
 
 	int shape_width = WINDOW_WIDTH / GRID_WIDTH;
@@ -107,7 +108,7 @@ int main()
 			}
 			landed = false;
 			current_block = &block_types[rand() % 7];
-			current_block_position = sf::Vector2i(0, 0);
+			current_block_position = sf::Vector2i(GRID_WIDTH / 2 - 2, 0);
 		} else {
 			current_block_position.y++;
 		}
