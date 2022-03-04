@@ -1,3 +1,9 @@
+#define WINDOW_WIDTH 400
+#define WINDOW_HEIGHT 400
+
+#define GRID_WIDTH 20
+#define GRID_HEIGHT 20
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
@@ -8,14 +14,28 @@
 
 class TileType {
 	public:
+		static TileType white, red, green, blue, yellow, magenta, cyan;
 		sf::Color color;
 		TileType(sf::Color _color) {
 			color = _color;
 		}
 };
 
+TileType TileType::white = TileType(sf::Color::White);
+TileType TileType::red = TileType(sf::Color::Red);
+TileType TileType::green = TileType(sf::Color::Green);
+TileType TileType::blue = TileType(sf::Color::Blue);
+TileType TileType::yellow = TileType(sf::Color::Yellow);
+TileType TileType::magenta = TileType(sf::Color::Magenta);
+TileType TileType::cyan = TileType(sf::Color::Cyan);
+
 class BlockType {
 	public:
+		static BlockType i, j, l, o, s, t, z;
+		static BlockType* list[];
+		static BlockType* random() {
+			return list[rand() % 7];
+		}
 		TileType* tile_type;
 		std::array<std::array<bool, 4>, 2> grid;
 		BlockType(TileType* _tile_type, const std::array<std::array<bool, 4>, 2>& _grid) {
@@ -24,36 +44,32 @@ class BlockType {
 		}
 };
 
+// https://stackoverflow.com/questions/12844475
+BlockType BlockType::i(&TileType::white, {{{{0, 0, 0, 0}}, {{1, 1, 1, 1}}}});
+BlockType BlockType::j(&TileType::red, {{{{1, 0, 0, 0}}, {{1, 1, 1, 0}}}});
+BlockType BlockType::l(&TileType::green, {{{{0, 0, 0, 0}}, {{1, 1, 1, 1}}}});
+BlockType BlockType::o(&TileType::blue, {{{{0, 1, 1, 0}}, {{0, 1, 1, 0}}}});
+BlockType BlockType::s(&TileType::yellow, {{{{0, 1, 1, 0}}, {{1, 1, 0, 0}}}});
+BlockType BlockType::t(&TileType::magenta, {{{{0, 1, 0, 0}}, {{1, 1, 1, 0}}}});
+BlockType BlockType::z(&TileType::cyan, {{{{1, 1, 0, 0}}, {{0, 1, 1, 0}}}});
+BlockType* BlockType::list[] = {&i, &j, &l, &o, &s, &t, &z};
+
+class Block {
+	public:
+		BlockType* type;
+		sf::Vector2i position;
+		Block() {
+			type = BlockType::random();
+			position = sf::Vector2i(GRID_WIDTH / 2 - 2, 0);
+		}
+};
+
 int main()
 {
-	#define WINDOW_WIDTH 400
-	#define WINDOW_HEIGHT 400
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "elnutris");
 	window.setFramerateLimit(8);
-
-	TileType white(sf::Color::White);
-	TileType red(sf::Color::Red);
-	TileType green(sf::Color::Green);
-	TileType blue(sf::Color::Blue);
-	TileType yellow(sf::Color::Yellow);
-	TileType magenta(sf::Color::Magenta);
-	TileType cyan(sf::Color::Cyan);
-
-	// https://stackoverflow.com/questions/12844475
-	BlockType i(&white, {{{{0, 0, 0, 0}}, {{1, 1, 1, 1}}}});
-	BlockType j(&red, {{{{1, 0, 0, 0}}, {{1, 1, 1, 0}}}});
-	BlockType l(&green, {{{{0, 0, 0, 0}}, {{1, 1, 1, 1}}}});
-	BlockType o(&blue, {{{{0, 1, 1, 0}}, {{0, 1, 1, 0}}}});
-	BlockType s(&yellow, {{{{0, 1, 1, 0}}, {{1, 1, 0, 0}}}});
-	BlockType t(&magenta, {{{{0, 1, 0, 0}}, {{1, 1, 1, 0}}}});
-	BlockType z(&cyan, {{{{1, 1, 0, 0}}, {{0, 1, 1, 0}}}});
-	BlockType block_types[] = {i, j, l, o, s, t, z};
-
-	#define GRID_WIDTH 20
-	#define GRID_HEIGHT 20
 	
-	auto current_block = &block_types[rand() % 7];;
-	auto current_block_position = sf::Vector2i(GRID_WIDTH / 2 - 2, 0);
+	Block block;
 
 	TileType* grid[GRID_HEIGHT][GRID_WIDTH] = { nullptr };
 
@@ -73,21 +89,21 @@ int main()
 		window.clear();
 
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-			current_block_position.x--;
+			block.position.x--;
 		}
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-			current_block_position.x++;
+			block.position.x++;
 		}
 
-		shape.setFillColor(current_block->tile_type->color);
+		shape.setFillColor(block.type->tile_type->color);
 		bool landed = false;
 		for (int y = 0; y < 2; y++) {
 			for (int x = 0; x < 4; x++) {
-				if (!current_block->grid[y][x]) {
+				if (!block.type->grid[y][x]) {
 					continue;
 				}
-				int global_x = x + current_block_position.x;
-				int global_y = y + current_block_position.y;
+				int global_x = x + block.position.x;
+				int global_y = y + block.position.y;
 				if (global_y == GRID_HEIGHT - 1 || grid[global_y + 1][global_x] != nullptr) {
 					landed = true;
 				}
@@ -98,19 +114,18 @@ int main()
 		if (landed) {
 			for (int y = 0; y < 2; y++) {
 				for (int x = 0; x < 4; x++) {
-					if (!current_block->grid[y][x]) {
+					if (!block.type->grid[y][x]) {
 						continue;
 					}
-					int global_x = x + current_block_position.x;
-					int global_y = y + current_block_position.y;
-					grid[global_y][global_x] = current_block->tile_type;
+					int global_x = x + block.position.x;
+					int global_y = y + block.position.y;
+					grid[global_y][global_x] = block.type->tile_type;
 				}
 			}
 			landed = false;
-			current_block = &block_types[rand() % 7];
-			current_block_position = sf::Vector2i(GRID_WIDTH / 2 - 2, 0);
+			block = Block();
 		} else {
-			current_block_position.y++;
+			block.position.y++;
 		}
 
 		for (int y = 0; y < GRID_HEIGHT; y++) {
