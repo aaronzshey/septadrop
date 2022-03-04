@@ -105,15 +105,35 @@ int main()
 					int global_y = y + block.position.y;
 					if (global_x <= 0 || global_x > GRID_WIDTH || grid[global_y][global_x + movement]) {
 						obstructed = true;
-						goto after_loop;
+						goto after_movement_loop;
 					}
 				}
 			}
 		}
-		after_loop:
+		after_movement_loop:
 		if (!obstructed) {
 			block.position.x += movement;
 		}
+
+		// Snapping
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+			while (true) {
+				for (int y = 0; y < 2; y++) {
+					for (int x = 0; x < 4; x++) {
+						if (!block.type->grid[y][x]) {
+							continue;
+						}
+						int global_x = x + block.position.x;
+						int global_y = y + block.position.y;
+						if (global_y == GRID_HEIGHT - 1 || grid[global_y + 1][global_x] != nullptr) {
+							goto after_snap_loop;
+						}
+					}
+				}
+				block.position.y++;
+			}
+		}
+		after_snap_loop:
 
 		// Drawing block and land checking
 		shape.setFillColor(block.type->tile_type->color);
