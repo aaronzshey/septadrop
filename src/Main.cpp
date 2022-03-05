@@ -1,18 +1,15 @@
-#include <SFML/Window/Keyboard.hpp>
-#define WINDOW_WIDTH 400
-#define WINDOW_HEIGHT 400
-
-#define GRID_WIDTH 20
-#define GRID_HEIGHT 20
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Vector2.hpp>
-#include <iostream>
-#include <string.h>
-#include <array>
-#include <list>
+#include <SFML/Window/Keyboard.hpp>
+
+#define WINDOW_WIDTH 400
+#define WINDOW_HEIGHT 400
+
+#define GRID_WIDTH 20
+#define GRID_HEIGHT 20
 
 class TileType {
 	public:
@@ -39,8 +36,8 @@ class BlockType {
 			return list[rand() % 7];
 		}
 		TileType* tile_type;
-		std::array<std::array<bool, 4>, 2> grid;
-		BlockType(TileType* _tile_type, const std::array<std::array<bool, 4>, 2>& _grid) {
+		std::vector<std::vector<bool>> grid;
+		BlockType(TileType* _tile_type, const std::vector<std::vector<bool>> _grid) {
 			tile_type = _tile_type;
 			grid = _grid;
 		}
@@ -73,8 +70,8 @@ class Block {
 			position = sf::Vector2i(GRID_WIDTH / 2 - 2, 0);
 			rotation_state = 0;
 		}
-		std::list<sf::Vector2i> get_tiles() {
-			std::list<sf::Vector2i>list = {};
+		std::vector<sf::Vector2i> get_tiles() {
+			std::vector<sf::Vector2i>tiles = {};
 			for (int y = 0; y < 2; y++) {
 				for (int x = 0; x < 4; x++) {
 					if (!type->grid[y][x]) {
@@ -97,10 +94,10 @@ class Block {
 					}
 					int global_x = rotated_x + position.x;
 					int global_y = rotated_y + position.y;
-					list.push_front(sf::Vector2i(global_x, global_y));
+					tiles.push_back(sf::Vector2i(global_x, global_y));
 				}
 			}
-			return list;
+			return tiles;
 		}
 };
 
