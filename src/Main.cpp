@@ -260,7 +260,7 @@ int main()
 				grid[tile.y][tile.x] = block.type->tile_type;
 			}
 			// Check for completed rows
-			for (int y = block.position.y; y < block.position.y + block.type->grid.size(); y++) {
+			for (int y = 0; y < GRID_HEIGHT; y++) {
 				bool completed = true;
 				for (int x = 0; x < GRID_WIDTH; x++) {
 					if (!grid[y][x]) {
