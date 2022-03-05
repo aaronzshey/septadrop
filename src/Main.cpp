@@ -274,7 +274,6 @@ int main()
 						grid[z + 1][x] = grid[z][x];
 					}
 				}
-				break;
 			}
 			block = Block();
 		} else {
