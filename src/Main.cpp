@@ -38,9 +38,11 @@ class BlockType {
 		}
 		TileType* tile_type;
 		std::vector<std::vector<bool>> grid;
-		BlockType(TileType* _tile_type, const std::vector<std::vector<bool>> _grid) {
+		bool rotate;
+		BlockType(TileType* _tile_type, const std::vector<std::vector<bool>> _grid, bool _rotate = true) {
 			tile_type = _tile_type;
 			grid = _grid;
+			rotate = _rotate;
 		}
 };
 
@@ -64,7 +66,7 @@ BlockType BlockType::l(&TileType::green, {
 BlockType BlockType::o(&TileType::blue, {
 	{1, 1},
 	{1, 1}
-});
+}, false);
 BlockType BlockType::s(&TileType::yellow, {
 	{0, 1, 1},
 	{1, 1, 0},
@@ -108,29 +110,31 @@ class Block {
 					}
 					int rotated_x = x;
 					int rotated_y = y;
-					int center_x = type->grid[0].size() / 2;
-					int center_y = type->grid.size() / 2;
-					int offset_x = x - center_x;
-					int offset_y = y - center_y;
-					switch (rotation_state) {
-						case 0:
-							rotated_x = x;
-							rotated_y = y;
-							break;
-						case 1:
-							rotated_x = center_x + offset_y;
-							rotated_y = center_y - offset_x;
-							break;
-						case 2:
-							rotated_x = center_x - offset_x;
-							rotated_y = center_y - offset_y;
-							break;
-						case 3:
-							rotated_x = center_x - offset_y;
-							rotated_y = center_y + offset_x;
-							break;
-						default:
-							rotation_state %= 4;
+					if (type->rotate) {
+						int center_x = type->grid[0].size() / 2;
+						int center_y = type->grid.size() / 2;
+						int offset_x = x - center_x;
+						int offset_y = y - center_y;
+						switch (rotation_state) {
+							case 0:
+								rotated_x = x;
+								rotated_y = y;
+								break;
+							case 1:
+								rotated_x = center_x + offset_y;
+								rotated_y = center_y - offset_x;
+								break;
+							case 2:
+								rotated_x = center_x - offset_x;
+								rotated_y = center_y - offset_y;
+								break;
+							case 3:
+								rotated_x = center_x - offset_y;
+								rotated_y = center_y + offset_x;
+								break;
+							default:
+								rotation_state %= 4;
+						}
 					}
 					int global_x = rotated_x + position.x;
 					int global_y = rotated_y + position.y;
