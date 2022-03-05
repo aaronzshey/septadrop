@@ -7,10 +7,10 @@
 #include <iostream>
 
 #define WINDOW_WIDTH 400
-#define WINDOW_HEIGHT 400
+#define WINDOW_HEIGHT 800
 
 #define GRID_WIDTH 20
-#define GRID_HEIGHT 20
+#define GRID_HEIGHT 40
 
 class TileType {
 	public:
