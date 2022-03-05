@@ -12,6 +12,7 @@
 #include <iostream>
 #include <string.h>
 #include <array>
+#include <list>
 
 class TileType {
 	public:
@@ -59,9 +60,32 @@ class Block {
 	public:
 		BlockType* type;
 		sf::Vector2i position;
+		/*
+		rotation_state transformations:
+		0 ->  x  y
+		1 -> -x  y
+		2 -> -x -y
+		3 ->  x -y
+		*/
+		int rotation_state;
 		Block() {
 			type = BlockType::random();
 			position = sf::Vector2i(GRID_WIDTH / 2 - 2, 0);
+			rotation_state = 0;
+		}
+		std::list<sf::Vector2i> get_tiles() {
+			std::list<sf::Vector2i>list = {};
+			for (int y = 0; y < 2; y++) {
+				for (int x = 0; x < 4; x++) {
+					if (!type->grid[y][x]) {
+						continue;
+					}
+					int global_x = x + position.x;
+					int global_y = y + position.y;
+					list.push_front(sf::Vector2i(global_x, global_y));
+				}
+			}
+			return list;
 		}
 };
 
@@ -104,17 +128,10 @@ int main()
 			movement++;
 		bool obstructed = false;
 		if (movement != 0) {
-			for (int y = 0; y < 2; y++) {
-				for (int x = 0; x < 4; x++) {
-					if (!block.type->grid[y][x]) {
-						continue;
-					}
-					int global_x = x + block.position.x;
-					int global_y = y + block.position.y;
-					if (global_x <= 0 || global_x > GRID_WIDTH || grid[global_y][global_x + movement]) {
-						obstructed = true;
-						goto after_movement_loop;
-					}
+			for (auto tile : block.get_tiles()) {
+				if (tile.x <= 0 || tile.x > GRID_WIDTH || grid[tile.y][tile.x + movement]) {
+					obstructed = true;
+					goto after_movement_loop;
 				}
 			}
 		}
@@ -124,62 +141,42 @@ int main()
 		}
 
 		// Snapping
-		int snap_y = block.position.y;
+		int snap_offset = 0;
 		while (true) {
-			for (int y = 0; y < 2; y++) {
-				for (int x = 0; x < 4; x++) {
-					if (!block.type->grid[y][x]) {
-						continue;
-					}
-					int global_x = x + block.position.x;
-					int global_y = y + snap_y;
-					if (global_y == GRID_HEIGHT - 1 || grid[global_y + 1][global_x] != nullptr) {
-						goto after_snap_loop;
-					}
+			for (auto tile : block.get_tiles()) {
+				int y = tile.y + snap_offset;
+				if (y == GRID_HEIGHT - 1 || grid[y + 1][tile.x] != nullptr) {
+					goto after_snap_loop;
 				}
 			}
-			snap_y++;
+			snap_offset++;
 		}
 		after_snap_loop:
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
-			block.position.y = snap_y;
+			block.position.y += snap_offset;
 		}
 
 		// Drawing block and land checking
 		sf::Color ghost_color = block.type->tile_type->color;
 		ghost_color.a = 64;
 		bool landed = false;
-		for (int y = 0; y < 2; y++) {
-			for (int x = 0; x < 4; x++) {
-				if (!block.type->grid[y][x]) {
-					continue;
-				}
-				int global_x = x + block.position.x;
-				int global_y = y + block.position.y;
-				int global_snap_y = snap_y + y;
-				if (global_y == GRID_HEIGHT - 1 || grid[global_y + 1][global_x] != nullptr) {
-					landed = true;
-				}
-				shape.setFillColor(block.type->tile_type->color);
-				shape.setPosition(global_x * shape_width, global_y * shape_height);
-				window.draw(shape);
-				shape.setFillColor(ghost_color);
-				shape.setPosition(global_x * shape_width, global_snap_y * shape_height);
-				window.draw(shape);
+		for (auto tile : block.get_tiles()) {
+			int snap_y = tile.y + snap_offset;
+			if (tile.y == GRID_HEIGHT - 1 || grid[tile.y + 1][tile.x] != nullptr) {
+				landed = true;
 			}
+			shape.setFillColor(block.type->tile_type->color);
+			shape.setPosition(tile.x * shape_width, tile.y * shape_height);
+			window.draw(shape);
+			shape.setFillColor(ghost_color);
+			shape.setPosition(tile.x * shape_width, snap_y * shape_height);
+			window.draw(shape);
 		}
 
 		// Landing (transfering block to grid and reinitializing)
 		if (landed) {
-			for (int y = 0; y < 2; y++) {
-				for (int x = 0; x < 4; x++) {
-					if (!block.type->grid[y][x]) {
-						continue;
-					}
-					int global_x = x + block.position.x;
-					int global_y = y + block.position.y;
-					grid[global_y][global_x] = block.type->tile_type;
-				}
+			for (auto tile : block.get_tiles()) {
+				grid[tile.y][tile.x] = block.type->tile_type;
 			}
 			block = Block();
 		} else {
