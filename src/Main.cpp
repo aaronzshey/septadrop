@@ -150,7 +150,7 @@ int main()
 	int shape_height = WINDOW_HEIGHT / GRID_HEIGHT;
 	sf::RectangleShape shape(sf::Vector2f(shape_width, shape_height));
 
-	bool snap;
+	bool snap, rotate;
 
 	while (window.isOpen())
 	{
@@ -162,8 +162,15 @@ int main()
 					window.close();
 					break;
 				case sf::Event::KeyPressed:
-					if (event.key.code == sf::Keyboard::Space) {
-						snap = true;
+					switch (event.key.code) {
+						case sf::Keyboard::Space:
+							snap = true;
+							break;
+						case sf::Keyboard::Up:
+							rotate = true;
+							break;
+						default:
+							break;
 					}
 					break;
 				default:
@@ -177,7 +184,7 @@ int main()
 		window.setFramerateLimit(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) ? 8 : 6);
 
 		// Rotation
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+		if (rotate) {
 			block.rotation_state++;
 			// Check to see if new rotation state is overlapping any tiles
 			for (auto tile : block.get_tiles()) {
@@ -186,6 +193,7 @@ int main()
 					break;
 				}
 			}
+			rotate = false;
 		}
 
 		// Horizontal movement
