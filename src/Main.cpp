@@ -148,7 +148,6 @@ class Block {
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "elnutris");
-	window.setFramerateLimit(8);
 	
 	Block block;
 
@@ -174,7 +173,7 @@ int main()
 		window.clear();
 
 		// Fast forward
-		window.setFramerateLimit(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) ? 16 : 8);
+		window.setFramerateLimit(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) ? 8 : 6);
 
 		// Rotation
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
