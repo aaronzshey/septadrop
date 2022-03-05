@@ -197,7 +197,7 @@ int main()
 		bool obstructed = false;
 		if (movement != 0) {
 			for (auto tile : block.get_tiles()) {
-				if (tile.x <= 0 || tile.x > GRID_WIDTH || grid[tile.y][tile.x + movement]) {
+				if (tile.x <= 0 || tile.x >= GRID_WIDTH - 1 || grid[tile.y][tile.x + movement]) {
 					obstructed = true;
 					goto after_movement_loop;
 				}
