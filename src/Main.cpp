@@ -43,13 +43,42 @@ class BlockType {
 		}
 };
 
-BlockType BlockType::i(&TileType::white, {{0, 0, 0, 0}, {1, 1, 1, 1}});
-BlockType BlockType::j(&TileType::red, {{1, 0, 0, 0}, {1, 1, 1, 0}});
-BlockType BlockType::l(&TileType::green, {{0, 0, 0, 1}, {0, 1, 1, 1}});
-BlockType BlockType::o(&TileType::blue, {{0, 1, 1, 0}, {0, 1, 1, 0}});
-BlockType BlockType::s(&TileType::yellow, {{0, 1, 1, 0}, {1, 1, 0, 0}});
-BlockType BlockType::t(&TileType::magenta, {{0, 1, 0, 0}, {1, 1, 1, 0}});
-BlockType BlockType::z(&TileType::cyan, {{1, 1, 0, 0}, {0, 1, 1, 0}});
+// https://gamedev.stackexchange.com/a/17978
+BlockType BlockType::i(&TileType::white, {
+	{0, 0, 0, 0},
+	{1, 1, 1, 1},
+	{0, 0, 0, 0},
+	{0, 0, 0, 0}
+});
+BlockType BlockType::j(&TileType::red, {
+	{1, 0, 0},
+	{1, 1, 1},
+	{0, 0, 0}
+});
+BlockType BlockType::l(&TileType::green, {
+	{0, 0, 1},
+	{1, 1, 1},
+	{0, 0, 0}
+});
+BlockType BlockType::o(&TileType::blue, {
+	{1, 1},
+	{1, 1}
+});
+BlockType BlockType::s(&TileType::yellow, {
+	{0, 1, 1},
+	{1, 1, 0},
+	{0, 0, 0}
+});
+BlockType BlockType::t(&TileType::magenta, {
+	{0, 1, 0},
+	{1, 1, 1},
+	{0, 0, 0}
+});
+BlockType BlockType::z(&TileType::cyan, {
+	{1, 1, 0},
+	{0, 1, 1},
+	{0, 0, 0}
+});
 BlockType* BlockType::list[] = {&i, &j, &l, &o, &s, &t, &z};
 
 class Block {
@@ -66,7 +95,7 @@ class Block {
 		int rotation_state;
 		Block() {
 			type = BlockType::random();
-			position = sf::Vector2i(GRID_WIDTH / 2 - 2, 0);
+			position = sf::Vector2i(GRID_WIDTH / 2 - type->grid[0].size() / 2, 0);
 			rotation_state = 0;
 		}
 		std::vector<sf::Vector2i> get_tiles() {
