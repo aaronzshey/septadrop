@@ -140,6 +140,8 @@ class Block {
 
 int main()
 {
+	srand(time(NULL));
+	
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "elnutris");
 	
 	Block block;
