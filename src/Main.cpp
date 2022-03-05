@@ -175,6 +175,13 @@ int main()
 		// Rotation
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
 			block.rotation_state++;
+			// Check to see if new rotation state is overlapping any tiles
+			for (auto tile : block.get_tiles()) {
+				if (tile.x <= 0 || tile.x >= GRID_WIDTH || grid[tile.y][tile.x]) {
+					block.rotation_state--;
+					break;
+				}
+			}
 		}
 
 		// Horizontal movement
