@@ -80,8 +80,23 @@ class Block {
 					if (!type->grid[y][x]) {
 						continue;
 					}
-					int global_x = x + position.x;
-					int global_y = y + position.y;
+					int rotated_x = x;
+					int rotated_y = y;
+					switch (rotation_state) {
+						case 0:
+							break;
+						case 1:
+							rotated_x *= -1;
+						case 2:
+							rotated_x *= -1;
+							rotated_y *= -1;
+						case 3:
+							rotated_y *= -1;
+						default:
+							rotation_state %= 4;
+					}
+					int global_x = rotated_x + position.x;
+					int global_y = rotated_y + position.y;
 					list.push_front(sf::Vector2i(global_x, global_y));
 				}
 			}
@@ -119,6 +134,11 @@ int main()
 
 		// Fast forward
 		window.setFramerateLimit(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) ? 16 : 8);
+
+		// Rotation
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up)) {
+			block.rotation_state++;
+		}
 
 		// Horizontal movement
 		int movement = 0;
