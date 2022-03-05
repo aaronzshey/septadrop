@@ -72,8 +72,8 @@ class Block {
 		}
 		std::vector<sf::Vector2i> get_tiles() {
 			std::vector<sf::Vector2i>tiles = {};
-			for (int y = 0; y < 2; y++) {
-				for (int x = 0; x < 4; x++) {
+			for (int y = 0; y < type->grid.size(); y++) {
+				for (int x = 0; x < type->grid[y].size(); x++) {
 					if (!type->grid[y][x]) {
 						continue;
 					}
