@@ -88,13 +88,6 @@ class Block {
 	public:
 		BlockType* type;
 		sf::Vector2i position;
-		/*
-		rotation_state transformations:
-		0 ->  x  y
-		1 -> -x  y
-		2 -> -x -y
-		3 ->  x -y
-		*/
 		int rotation_state;
 		Block() {
 			type = BlockType::random();
