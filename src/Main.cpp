@@ -43,14 +43,13 @@ class BlockType {
 		}
 };
 
-// https://stackoverflow.com/questions/12844475
-BlockType BlockType::i(&TileType::white, {{{{0, 0, 0, 0}}, {{1, 1, 1, 1}}}});
-BlockType BlockType::j(&TileType::red, {{{{1, 0, 0, 0}}, {{1, 1, 1, 0}}}});
-BlockType BlockType::l(&TileType::green, {{{{0, 0, 0, 1}}, {{0, 1, 1, 1}}}});
-BlockType BlockType::o(&TileType::blue, {{{{0, 1, 1, 0}}, {{0, 1, 1, 0}}}});
-BlockType BlockType::s(&TileType::yellow, {{{{0, 1, 1, 0}}, {{1, 1, 0, 0}}}});
-BlockType BlockType::t(&TileType::magenta, {{{{0, 1, 0, 0}}, {{1, 1, 1, 0}}}});
-BlockType BlockType::z(&TileType::cyan, {{{{1, 1, 0, 0}}, {{0, 1, 1, 0}}}});
+BlockType BlockType::i(&TileType::white, {{0, 0, 0, 0}, {1, 1, 1, 1}});
+BlockType BlockType::j(&TileType::red, {{1, 0, 0, 0}, {1, 1, 1, 0}});
+BlockType BlockType::l(&TileType::green, {{0, 0, 0, 1}, {0, 1, 1, 1}});
+BlockType BlockType::o(&TileType::blue, {{0, 1, 1, 0}, {0, 1, 1, 0}});
+BlockType BlockType::s(&TileType::yellow, {{0, 1, 1, 0}, {1, 1, 0, 0}});
+BlockType BlockType::t(&TileType::magenta, {{0, 1, 0, 0}, {1, 1, 1, 0}});
+BlockType BlockType::z(&TileType::cyan, {{1, 1, 0, 0}, {0, 1, 1, 0}});
 BlockType* BlockType::list[] = {&i, &j, &l, &o, &s, &t, &z};
 
 class Block {
