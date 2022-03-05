@@ -157,6 +157,8 @@ int main()
 	int shape_height = WINDOW_HEIGHT / GRID_HEIGHT;
 	sf::RectangleShape shape(sf::Vector2f(shape_width, shape_height));
 
+	bool snap;
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -165,6 +167,12 @@ int main()
 			switch (event.type) {
 				case sf::Event::Closed:
 					window.close();
+					break;
+				case sf::Event::KeyPressed:
+					if (event.key.code == sf::Keyboard::Space) {
+						snap = true;
+					}
+					break;
 				default:
 					break;
 			}
@@ -219,8 +227,9 @@ int main()
 			snap_offset++;
 		}
 		after_snap_loop:
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Space)) {
+		if (snap) {
 			block.position.y += snap_offset;
+			snap = false;
 		}
 
 		// Drawing block and land checking
