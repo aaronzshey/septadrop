@@ -4,6 +4,7 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <iostream>
 
 #define WINDOW_WIDTH 400
 #define WINDOW_HEIGHT 400
@@ -107,16 +108,27 @@ class Block {
 					}
 					int rotated_x = x;
 					int rotated_y = y;
+					int center_x = type->grid[0].size() / 2;
+					int center_y = type->grid.size() / 2;
+					int offset_x = x - center_x;
+					int offset_y = y - center_y;
 					switch (rotation_state) {
 						case 0:
+							rotated_x = x;
+							rotated_y = y;
 							break;
 						case 1:
-							rotated_x *= -1;
+							rotated_x = center_x + offset_y;
+							rotated_y = center_y - offset_x;
+							break;
 						case 2:
-							rotated_x *= -1;
-							rotated_y *= -1;
+							rotated_x = center_x - offset_x;
+							rotated_y = center_y - offset_y;
+							break;
 						case 3:
-							rotated_y *= -1;
+							rotated_x = center_x - offset_y;
+							rotated_y = center_y + offset_x;
+							break;
 						default:
 							rotation_state %= 4;
 					}
