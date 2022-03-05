@@ -232,6 +232,8 @@ int main()
 			int snap_y = tile.y + snap_offset;
 			if (tile.y == GRID_HEIGHT - 1 || grid[tile.y + 1][tile.x] != nullptr) {
 				landed = true;
+				window.clear();
+				break;
 			}
 			shape.setFillColor(block.type->tile_type->color);
 			shape.setPosition(tile.x * shape_width, tile.y * shape_height);
@@ -245,6 +247,25 @@ int main()
 		if (landed) {
 			for (auto tile : block.get_tiles()) {
 				grid[tile.y][tile.x] = block.type->tile_type;
+			}
+			// Check for completed rows
+			for (int y = block.position.y; y < block.position.y + block.type->grid.size(); y++) {
+				bool completed = true;
+				for (int x = 0; x < GRID_WIDTH; x++) {
+					if (!grid[y][x]) {
+						completed = false;
+						break;
+					}
+				}
+				if (!completed) {
+					continue;
+				}
+				for (int z = y - 1; z >= 0; z--) {
+					for (int x = 0; x < GRID_WIDTH; x++) {
+						grid[z + 1][x] = grid[z][x];
+					}
+				}
+				break;
 			}
 			block = Block();
 		} else {
