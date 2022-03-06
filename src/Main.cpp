@@ -1,11 +1,13 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <iostream>
+#include <string>
 
 #define WINDOW_WIDTH 400
 #define WINDOW_HEIGHT 800
@@ -158,6 +160,18 @@ int main()
 	sf::Clock update_clock;
 	sf::Clock move_clock;
 
+	int score = 0;
+
+	sf::Font font;
+	font.loadFromFile("../res/stripped.ttf");
+
+	sf::Text text;
+	text.setFont(font);
+	text.setString("0");
+	text.setCharacterSize(24);
+	text.setFillColor(sf::Color::White);
+	text.setPosition(8, 0);
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -309,6 +323,8 @@ int main()
 						grid[z + 1][x] = grid[z][x];
 					}
 				}
+				score++;
+				text.setString(std::to_string(score));
 			}
 			block = Block();
 		} else if(is_update_frame) {
@@ -332,6 +348,7 @@ int main()
 				window.draw(shape);
 			}
 		}		
+		window.draw(text);
 
 		window.display();
 
