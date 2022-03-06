@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <iostream>
@@ -152,7 +153,9 @@ int main()
 	int shape_height = WINDOW_HEIGHT / GRID_HEIGHT;
 	sf::RectangleShape shape(sf::Vector2f(shape_width, shape_height));
 
-	bool snap, rotate;
+	bool snap, rotate, move_left, move_right;
+	sf::Clock update_clock;
+	sf::Clock move_clock;
 
 	while (window.isOpen())
 	{
@@ -171,6 +174,12 @@ int main()
 						case sf::Keyboard::Up:
 							rotate = true;
 							break;
+						case sf::Keyboard::Left:
+							move_left = true;
+							break;
+						case sf::Keyboard::Right:
+							move_right = true;
+							break;
 						default:
 							break;
 					}
@@ -180,13 +189,20 @@ int main()
 			}
 		}
 
+		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() > 250;
+		if (is_update_frame) {
+			update_clock.restart();
+		}
+
+		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() > 125;
+		if (is_move_frame) {
+			move_clock.restart();
+		}
+
 		window.clear();
 
-		// Fast forward
-		window.setFramerateLimit(sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) ? 8 : 6);
-
 		// Rotation
-		if (rotate) {
+		if (rotate && is_move_frame) {
 			block.rotation_state++;
 			// Check to see if new rotation state is overlapping any tiles
 			for (auto tile : block.get_tiles()) {
@@ -199,23 +215,29 @@ int main()
 		}
 
 		// Horizontal movement
-		int movement = 0;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-			movement--;
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-			movement++;
-		bool obstructed = false;
-		if (movement != 0) {
-			for (auto tile : block.get_tiles()) {
-				if (tile.x <= 0 || tile.x >= GRID_WIDTH - 1 || grid[tile.y][tile.x + movement]) {
-					obstructed = true;
-					goto after_movement_loop;
+		if (is_move_frame) {
+			int movement = 0;
+			if (move_left || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+				movement--;
+				move_left = false;
+			}
+			if (move_right ||sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+				movement++;
+				move_right = false;
+			}
+			bool obstructed = false;
+			if (movement != 0) {
+				for (auto tile : block.get_tiles()) {
+					if (tile.x + movement < 0 || tile.x + movement >= GRID_WIDTH || grid[tile.y][tile.x + movement]) {
+						obstructed = true;
+						goto after_movement_loop;
+					}
 				}
 			}
-		}
-		after_movement_loop:
-		if (!obstructed) {
-			block.position.x += movement;
+			after_movement_loop:
+			if (!obstructed) {
+				block.position.x += movement;
+			}
 		}
 
 		// Snapping
@@ -278,7 +300,7 @@ int main()
 				}
 			}
 			block = Block();
-		} else {
+		} else if(is_update_frame) {
 			block.position.y++;
 		}
 
