@@ -173,6 +173,8 @@ int main()
 	text.setFillColor(sf::Color::White);
 	text.setPosition(8, 0);
 
+	int update_interval = 250;
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -205,12 +207,12 @@ int main()
 			}
 		}
 
-		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() > (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ? 125 : 250);
+		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() > (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ? update_interval / 2 : update_interval);
 		if (is_update_frame) {
 			update_clock.restart();
 		}
 
-		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() > 125;
+		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() > update_interval / 2;
 		if (is_move_frame) {
 			move_clock.restart();
 		}
@@ -305,6 +307,7 @@ int main()
 		// Landing (transfering block to grid and reinitializing)
 		if (landed) {
 			if (block.position.y == 0) {
+				update_interval += score * 10;
 				score = 0;
 				text.setString("0");
 				for (int y = 0; y < GRID_HEIGHT; y++) {
@@ -334,6 +337,7 @@ int main()
 						}
 					}
 					score++;
+					update_interval -= 10;
 					text.setString(std::to_string(score));
 				}
 			}
