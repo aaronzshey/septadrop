@@ -145,8 +145,10 @@ class Block {
 int main()
 {
 	srand(time(NULL));
+
 	
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "elnutris");
+	window.setFramerateLimit(60);
 	
 	Block block;
 
