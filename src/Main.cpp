@@ -154,6 +154,7 @@ int main()
 	sf::RectangleShape shape(sf::Vector2f(shape_width, shape_height));
 
 	bool snap, rotate, move_left, move_right;
+	bool redraw;
 	sf::Clock update_clock;
 	sf::Clock move_clock;
 
@@ -199,8 +200,6 @@ int main()
 			move_clock.restart();
 		}
 
-		window.clear();
-
 		// Rotation
 		if (rotate && is_move_frame) {
 			block.rotation_state++;
@@ -208,6 +207,7 @@ int main()
 			for (auto tile : block.get_tiles()) {
 				if (tile.x <= 0 || tile.x >= GRID_WIDTH || grid[tile.y][tile.x]) {
 					block.rotation_state--;
+					redraw = true;
 					break;
 				}
 			}
@@ -237,6 +237,7 @@ int main()
 			after_movement_loop:
 			if (!obstructed) {
 				block.position.x += movement;
+				redraw = true;
 			}
 		}
 
@@ -255,26 +256,36 @@ int main()
 		if (snap) {
 			block.position.y += snap_offset;
 			snap = false;
+			redraw = true;
 		}
 
 		// Drawing block and land checking
-		sf::Color ghost_color = block.type->tile_type->color;
-		ghost_color.a = 64;
 		bool landed = false;
 		for (auto tile : block.get_tiles()) {
-			int snap_y = tile.y + snap_offset;
 			if (tile.y == GRID_HEIGHT - 1 || grid[tile.y + 1][tile.x] != nullptr) {
 				landed = true;
-				window.clear();
+				redraw = true;
 				break;
 			}
-			shape.setFillColor(block.type->tile_type->color);
-			shape.setPosition(tile.x * shape_width, tile.y * shape_height);
-			window.draw(shape);
-			shape.setFillColor(ghost_color);
-			shape.setPosition(tile.x * shape_width, snap_y * shape_height);
-			window.draw(shape);
 		}
+
+		if (redraw) {
+			window.clear();
+			if (!landed) {
+				sf::Color ghost_color = block.type->tile_type->color;
+				ghost_color.a = 64;
+				for (auto tile : block.get_tiles()) {
+					int snap_y = tile.y + snap_offset;
+					shape.setFillColor(block.type->tile_type->color);
+					shape.setPosition(tile.x * shape_width, tile.y * shape_height);
+					window.draw(shape);
+					shape.setFillColor(ghost_color);
+					shape.setPosition(tile.x * shape_width, snap_y * shape_height);
+					window.draw(shape);
+				}
+			}
+		}
+
 
 		// Landing (transfering block to grid and reinitializing)
 		if (landed) {
@@ -304,6 +315,10 @@ int main()
 			block.position.y++;
 		}
 
+		if (!redraw) {
+			continue;
+		}
+		
 		// Drawing grid
 		for (int y = 0; y < GRID_HEIGHT; y++) {
 			for (int x = 0; x < GRID_WIDTH; x++) {
@@ -319,6 +334,8 @@ int main()
 		}		
 
 		window.display();
+
+		redraw = false;
 	}
 
 	return 0;
