@@ -190,7 +190,7 @@ int main()
 			}
 		}
 
-		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() > 250;
+		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() > (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ? 125 : 250);
 		if (is_update_frame) {
 			update_clock.restart();
 		}
@@ -318,7 +318,7 @@ int main()
 		if (!redraw) {
 			continue;
 		}
-		
+
 		// Drawing grid
 		for (int y = 0; y < GRID_HEIGHT; y++) {
 			for (int x = 0; x < GRID_WIDTH; x++) {
