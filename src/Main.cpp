@@ -156,7 +156,7 @@ int main()
 	sf::RectangleShape shape(sf::Vector2f(shape_width, shape_height));
 
 	bool snap, rotate, move_left, move_right;
-	bool redraw;
+	bool redraw = true;
 	sf::Clock update_clock;
 	sf::Clock move_clock;
 
