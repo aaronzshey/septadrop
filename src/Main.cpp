@@ -9,11 +9,11 @@
 #include <iostream>
 #include <string>
 
-#define WINDOW_WIDTH 400
-#define WINDOW_HEIGHT 800
+#define WINDOW_WIDTH 280
+#define WINDOW_HEIGHT 400
 
-#define GRID_WIDTH 20
-#define GRID_HEIGHT 40
+#define GRID_WIDTH 14
+#define GRID_HEIGHT 20
 
 class TileType {
 	public:
