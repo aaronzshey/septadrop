@@ -163,7 +163,7 @@ int main()
 	int score = 0;
 
 	sf::Font font;
-	font.loadFromFile("../res/stripped.ttf");
+	font.loadFromFile("../res/font.ttf");
 
 	sf::Text text;
 	text.setFont(font);
