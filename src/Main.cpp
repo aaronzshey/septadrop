@@ -7,6 +7,7 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <iostream>
+#include <iterator>
 #include <string>
 
 #define WINDOW_WIDTH 280
@@ -303,28 +304,38 @@ int main()
 
 		// Landing (transfering block to grid and reinitializing)
 		if (landed) {
-			for (auto tile : block.get_tiles()) {
-				grid[tile.y][tile.x] = block.type->tile_type;
-			}
-			// Check for completed rows
-			for (int y = 0; y < GRID_HEIGHT; y++) {
-				bool completed = true;
-				for (int x = 0; x < GRID_WIDTH; x++) {
-					if (!grid[y][x]) {
-						completed = false;
-						break;
-					}
-				}
-				if (!completed) {
-					continue;
-				}
-				for (int z = y - 1; z >= 0; z--) {
+			if (block.position.y == 0) {
+				score = 0;
+				text.setString("0");
+				for (int y = 0; y < GRID_HEIGHT; y++) {
 					for (int x = 0; x < GRID_WIDTH; x++) {
-						grid[z + 1][x] = grid[z][x];
+						grid[y][x] = nullptr;
 					}
 				}
-				score++;
-				text.setString(std::to_string(score));
+			} else {
+				for (auto tile : block.get_tiles()) {
+					grid[tile.y][tile.x] = block.type->tile_type;
+				}
+				// Check for completed rows
+				for (int y = 0; y < GRID_HEIGHT; y++) {
+					bool completed = true;
+					for (int x = 0; x < GRID_WIDTH; x++) {
+						if (!grid[y][x]) {
+							completed = false;
+							break;
+						}
+					}
+					if (!completed) {
+						continue;
+					}
+					for (int z = y - 1; z >= 0; z--) {
+						for (int x = 0; x < GRID_WIDTH; x++) {
+							grid[z + 1][x] = grid[z][x];
+						}
+					}
+					score++;
+					text.setString(std::to_string(score));
+				}
 			}
 			block = Block();
 		} else if(is_update_frame) {
