@@ -185,7 +185,10 @@ int main()
 	sf::Sprite sprite;
 	sprite.setTexture(texture);
 
-	bool snap, rotate, move_left, move_right;
+	bool rotate = true;
+	bool move_left = true;
+	bool move_right = true;
+	bool snap = false;
 	sf::Clock update_clock;
 	sf::Clock move_clock;
 
@@ -294,17 +297,19 @@ int main()
 			snap_offset++;
 		}
 		after_snap_loop:
+		bool landed = snap;
 		if (snap) {
 			block.position.y += snap_offset;
 			snap = false;
 		}
 
 		// Land checking
-		bool landed = false;
-		for (auto tile : block.get_tiles()) {
-			if (tile.y == GRID_HEIGHT - 1 || grid[tile.y + 1][tile.x] != nullptr) {
-				landed = true;
-				break;
+		if (!snap && is_update_frame) {
+			for (auto tile : block.get_tiles()) {
+				if (tile.y == GRID_HEIGHT - 1 || grid[tile.y + 1][tile.x] != nullptr) {
+					landed = true;
+					break;
+				}
 			}
 		}
 
