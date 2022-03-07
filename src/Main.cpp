@@ -8,6 +8,7 @@
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/WindowStyle.hpp>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -172,7 +173,7 @@ int main()
 {
 	srand(time(NULL));
 	
-	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "elnutris");
+	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "elnutris", sf::Style::Close);
 	window.setFramerateLimit(60);
 	
 	Block block;
