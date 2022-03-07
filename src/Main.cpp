@@ -2,7 +2,9 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
+#include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
@@ -10,28 +12,52 @@
 #include <iterator>
 #include <string>
 
-#define WINDOW_WIDTH 280
-#define WINDOW_HEIGHT 400
+#define TILE_SIZE 20
 
 #define GRID_WIDTH 14
 #define GRID_HEIGHT 20
 
+#define WINDOW_WIDTH GRID_WIDTH * TILE_SIZE
+#define WINDOW_HEIGHT GRID_HEIGHT * TILE_SIZE
+
 class TileType {
 	public:
-		static TileType white, red, green, blue, yellow, magenta, cyan;
-		sf::Color color;
-		TileType(sf::Color _color) {
-			color = _color;
+		sf::IntRect texture_rect;
+		sf::IntRect ghost_texture_rect;
+		TileType(sf::IntRect _texture_rect, sf::IntRect _ghost_texture_rect) {
+			texture_rect = _texture_rect;
+			ghost_texture_rect = _ghost_texture_rect;
 		}
 };
 
-TileType TileType::white = TileType(sf::Color::White);
-TileType TileType::red = TileType(sf::Color::Red);
-TileType TileType::green = TileType(sf::Color::Green);
-TileType TileType::blue = TileType(sf::Color::Blue);
-TileType TileType::yellow = TileType(sf::Color::Yellow);
-TileType TileType::magenta = TileType(sf::Color::Magenta);
-TileType TileType::cyan = TileType(sf::Color::Cyan);
+TileType tile_type_0(
+	sf::IntRect(0,             0, TILE_SIZE, TILE_SIZE),
+	sf::IntRect(0,             TILE_SIZE, TILE_SIZE, TILE_SIZE)
+);
+TileType tile_type_1(
+	sf::IntRect(TILE_SIZE,     0, TILE_SIZE, TILE_SIZE),
+	sf::IntRect(TILE_SIZE,     TILE_SIZE, TILE_SIZE, TILE_SIZE)
+);
+TileType tile_type_2(
+	sf::IntRect(TILE_SIZE * 2, 0, TILE_SIZE, TILE_SIZE),
+	sf::IntRect(TILE_SIZE * 2, TILE_SIZE, TILE_SIZE, TILE_SIZE)
+);
+TileType tile_type_3(
+	sf::IntRect(TILE_SIZE * 3, 0, TILE_SIZE, TILE_SIZE),
+	sf::IntRect(TILE_SIZE * 3, TILE_SIZE, TILE_SIZE, TILE_SIZE)
+);
+TileType tile_type_4(
+	sf::IntRect(TILE_SIZE * 4, 0, TILE_SIZE, TILE_SIZE),
+	sf::IntRect(TILE_SIZE * 4, TILE_SIZE, TILE_SIZE, TILE_SIZE)
+);
+TileType tile_type_5(
+	sf::IntRect(TILE_SIZE * 5, 0, TILE_SIZE, TILE_SIZE),
+	sf::IntRect(TILE_SIZE * 5, TILE_SIZE, TILE_SIZE, TILE_SIZE)
+);
+TileType tile_type_6(
+	sf::IntRect(TILE_SIZE * 6, 0, TILE_SIZE, TILE_SIZE),
+	sf::IntRect(TILE_SIZE * 6, TILE_SIZE, TILE_SIZE, TILE_SIZE)
+);
 
 class BlockType {
 	public:
@@ -51,37 +77,37 @@ class BlockType {
 };
 
 // https://gamedev.stackexchange.com/a/17978
-BlockType BlockType::i(&TileType::white, {
+BlockType BlockType::i(&tile_type_0, {
 	{0, 0, 0, 0},
 	{1, 1, 1, 1},
 	{0, 0, 0, 0},
 	{0, 0, 0, 0}
 });
-BlockType BlockType::j(&TileType::red, {
+BlockType BlockType::j(&tile_type_1, {
 	{1, 0, 0},
 	{1, 1, 1},
 	{0, 0, 0}
 });
-BlockType BlockType::l(&TileType::green, {
+BlockType BlockType::l(&tile_type_2, {
 	{0, 0, 1},
 	{1, 1, 1},
 	{0, 0, 0}
 });
-BlockType BlockType::o(&TileType::blue, {
+BlockType BlockType::o(&tile_type_3, {
 	{1, 1},
 	{1, 1}
 }, false);
-BlockType BlockType::s(&TileType::yellow, {
+BlockType BlockType::s(&tile_type_4, {
 	{0, 1, 1},
 	{1, 1, 0},
 	{0, 0, 0}
 });
-BlockType BlockType::t(&TileType::magenta, {
+BlockType BlockType::t(&tile_type_5, {
 	{0, 1, 0},
 	{1, 1, 1},
 	{0, 0, 0}
 });
-BlockType BlockType::z(&TileType::cyan, {
+BlockType BlockType::z(&tile_type_6, {
 	{1, 1, 0},
 	{0, 1, 1},
 	{0, 0, 0}
@@ -145,7 +171,6 @@ class Block {
 int main()
 {
 	srand(time(NULL));
-
 	
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "elnutris");
 	window.setFramerateLimit(60);
@@ -154,9 +179,10 @@ int main()
 
 	TileType* grid[GRID_HEIGHT][GRID_WIDTH] = { nullptr };
 
-	int shape_width = WINDOW_WIDTH / GRID_WIDTH;
-	int shape_height = WINDOW_HEIGHT / GRID_HEIGHT;
-	sf::RectangleShape shape(sf::Vector2f(shape_width, shape_height));
+	sf::Texture texture;
+	texture.loadFromFile("../res/texture.png");
+	sf::Sprite sprite;
+	sprite.setTexture(texture);
 
 	bool snap, rotate, move_left, move_right;
 	sf::Clock update_clock;
@@ -175,6 +201,8 @@ int main()
 	text.setPosition(8, 0);
 
 	int update_interval = 250;
+
+	auto clear_color = sf::Color(73, 52, 61);
 
 	while (window.isOpen())
 	{
@@ -280,18 +308,16 @@ int main()
 		}
 
 		// Draw block
-		window.clear();
+		window.clear(clear_color);
 		if (!landed) {
-			sf::Color ghost_color = block.type->tile_type->color;
-			ghost_color.a = 64;
 			for (auto tile : block.get_tiles()) {
 				int snap_y = tile.y + snap_offset;
-				shape.setFillColor(block.type->tile_type->color);
-				shape.setPosition(tile.x * shape_width, tile.y * shape_height);
-				window.draw(shape);
-				shape.setFillColor(ghost_color);
-				shape.setPosition(tile.x * shape_width, snap_y * shape_height);
-				window.draw(shape);
+				sprite.setTextureRect(block.type->tile_type->texture_rect);
+				sprite.setPosition(tile.x * TILE_SIZE, tile.y * TILE_SIZE);
+				window.draw(sprite);
+				sprite.setTextureRect(block.type->tile_type->ghost_texture_rect);
+				sprite.setPosition(tile.x * TILE_SIZE, snap_y * TILE_SIZE);
+				window.draw(sprite);
 			}
 		}
 
@@ -345,9 +371,9 @@ int main()
 					// If tile_type is a nullptr (no block), continue
 					continue;
 				}
-				shape.setFillColor(tile_type->color);
-				shape.setPosition(x * shape_width, y * shape_height);
-				window.draw(shape);
+				sprite.setTextureRect(tile_type->texture_rect);
+				sprite.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+				window.draw(sprite);
 			}
 		}		
 		window.draw(text);
