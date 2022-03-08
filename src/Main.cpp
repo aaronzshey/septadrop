@@ -4,11 +4,15 @@
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Window.hpp>
 #include <SFML/Window/WindowStyle.hpp>
+#include <initializer_list>
 #include <iostream>
 #include <iterator>
 #include <string>
@@ -18,8 +22,51 @@
 #define GRID_WIDTH 14
 #define GRID_HEIGHT 20
 
-#define WINDOW_WIDTH GRID_WIDTH * TILE_SIZE
-#define WINDOW_HEIGHT GRID_HEIGHT * TILE_SIZE
+#define WINDOW_WIDTH 500
+#define WINDOW_HEIGHT 440
+
+#define PLAYFIELD_X 20
+#define PLAYFIELD_Y 20
+
+class NumberRenderer {
+	public:
+		sf::IntRect numeral_rects[10];
+		sf::Texture texture;
+		NumberRenderer(
+			sf::Texture _texture,
+			std::initializer_list<sf::IntRect> _numeral_rects
+		) {
+			texture = _texture;
+			sprite = sf::Sprite(texture);
+			int i = 0;
+			for (auto numeral_rect = _numeral_rects.begin(); numeral_rect != _numeral_rects.end(); ++numeral_rect) {
+				numeral_rects[i] = *numeral_rect;
+				i++;
+			}
+		}
+		void render(sf::RenderWindow* window, uint number, int x, int y) {
+			auto number_string = std::to_string(number);
+			std::string numeral_string;
+			numeral_string.push_back(number_string.back());
+			auto numeral_rect = numeral_rects[std::stoi(numeral_string)];
+			int x_offset = -numeral_rect.width;
+			for (int i = number_string.length() - 1; i >= 0; i--) {
+				char numeral_string[] = {number_string[i]}; // stoi requires string (char[]) not char
+				auto numeral_rect = numeral_rects[std::stoi(numeral_string)];
+				sprite.setTextureRect(numeral_rect);
+				sprite.setPosition(x + x_offset, y);
+				window->draw(sprite);
+				if (i == 0) {
+					break;
+				}
+				numeral_string[0] = number_string[i - 1];
+				numeral_rect = numeral_rects[std::stoi(numeral_string)];
+				x_offset -= numeral_rect.width;
+			}
+		}
+	private:
+		sf::Sprite sprite;
+};
 
 class TileType {
 	public:
@@ -185,6 +232,26 @@ int main()
 	sf::Sprite sprite;
 	sprite.setTexture(texture);
 
+	sf::Texture background_texture;
+	background_texture.loadFromFile("../res/background.png");
+	sf::Sprite background;
+	background.setTexture(background_texture);
+
+	sf::Texture numeral_texture;
+	numeral_texture.loadFromFile("../res/numerals.png");
+	NumberRenderer number_renderer(numeral_texture, {
+		sf::IntRect(0, 0, 14, 16),
+		sf::IntRect(14, 0, 8, 16),
+		sf::IntRect(22, 0, 14, 16),
+		sf::IntRect(36, 0, 14, 16),
+		sf::IntRect(50, 0, 14, 16),
+		sf::IntRect(64, 0, 14, 16),
+		sf::IntRect(78, 0, 14, 16),
+		sf::IntRect(92, 0, 14, 16),
+		sf::IntRect(106, 0, 14, 16),
+		sf::IntRect(120, 0, 14, 16)
+	});
+
 	bool rotate = true;
 	bool move_left = true;
 	bool move_right = true;
@@ -192,17 +259,9 @@ int main()
 	sf::Clock update_clock;
 	sf::Clock move_clock;
 
-	int score = 0;
-
-	sf::Font font;
-	font.loadFromFile("../res/font.ttf");
-
-	sf::Text text;
-	text.setFont(font);
-	text.setString("0");
-	text.setCharacterSize(24);
-	text.setFillColor(sf::Color::White);
-	text.setPosition(8, 0);
+	int lines = 0;
+	int blocks = 0;
+	int tiles = 0;
 
 	int update_interval = 250;
 
@@ -313,16 +372,20 @@ int main()
 			}
 		}
 
+		// Clear window
+		// Normally, one would run window.clear(),
+		// but the background image covers the entire window.
+		window.draw(background);
+		
 		// Draw block
-		window.clear(clear_color);
 		if (!landed) {
 			for (auto tile : block.get_tiles()) {
 				int snap_y = tile.y + snap_offset;
 				sprite.setTextureRect(block.type->tile_type->texture_rect);
-				sprite.setPosition(tile.x * TILE_SIZE, tile.y * TILE_SIZE);
+				sprite.setPosition(PLAYFIELD_X + tile.x * TILE_SIZE, PLAYFIELD_Y + tile.y * TILE_SIZE);
 				window.draw(sprite);
 				sprite.setTextureRect(block.type->tile_type->ghost_texture_rect);
-				sprite.setPosition(tile.x * TILE_SIZE, snap_y * TILE_SIZE);
+				sprite.setPosition(PLAYFIELD_X + tile.x * TILE_SIZE, PLAYFIELD_Y + snap_y * TILE_SIZE);
 				window.draw(sprite);
 			}
 		}
@@ -330,9 +393,10 @@ int main()
 		// Landing (transfering block to grid and reinitializing)
 		if (landed) {
 			if (block.position.y == 0) {
-				update_interval += score * 10;
-				score = 0;
-				text.setString("0");
+				update_interval += lines * 10;
+				lines = 0;
+				blocks = 0;
+				tiles = 0;
 				for (int y = 0; y < GRID_HEIGHT; y++) {
 					for (int x = 0; x < GRID_WIDTH; x++) {
 						grid[y][x] = nullptr;
@@ -359,12 +423,13 @@ int main()
 							grid[z + 1][x] = grid[z][x];
 						}
 					}
-					score++;
+					lines++;
 					update_interval -= 10;
-					text.setString(std::to_string(score));
 				}
 			}
 			block = Block();
+			tiles += block.get_tiles().size();
+			blocks++;
 		} else if(is_update_frame) {
 			block.position.y++;
 		}
@@ -378,11 +443,14 @@ int main()
 					continue;
 				}
 				sprite.setTextureRect(tile_type->texture_rect);
-				sprite.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+				sprite.setPosition(PLAYFIELD_X + x * TILE_SIZE, PLAYFIELD_Y + y * TILE_SIZE);
 				window.draw(sprite);
 			}
-		}		
-		window.draw(text);
+		}
+
+		number_renderer.render(&window, lines, 477, 242);
+		number_renderer.render(&window, blocks, 477, 322);
+		number_renderer.render(&window, tiles, 477, 362);
 
 		window.display();
 	}
