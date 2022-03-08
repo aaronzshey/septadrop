@@ -30,13 +30,16 @@
 
 class NumberRenderer {
 	public:
-		sf::IntRect numeral_rects[10];
 		sf::Texture texture;
+		sf::IntRect comma_rect;
+		sf::IntRect numeral_rects[10];
 		NumberRenderer(
 			sf::Texture _texture,
+			sf::IntRect _comma_rect,
 			std::initializer_list<sf::IntRect> _numeral_rects
 		) {
 			texture = _texture;
+			comma_rect = _comma_rect;
 			sprite = sf::Sprite(texture);
 			int i = 0;
 			for (auto numeral_rect = _numeral_rects.begin(); numeral_rect != _numeral_rects.end(); ++numeral_rect) {
@@ -50,14 +53,25 @@ class NumberRenderer {
 			numeral_string.push_back(number_string.back());
 			auto numeral_rect = numeral_rects[std::stoi(numeral_string)];
 			int x_offset = -numeral_rect.width;
-			for (int i = number_string.length() - 1; i >= 0; i--) {
-				char numeral_string[] = {number_string[i]}; // stoi requires string (char[]) not char
+			uint digits = number_string.length();
+			for (int i = digits - 1; i >= 0; i--) {
+				char numeral_string[] = {number_string[i]};
 				auto numeral_rect = numeral_rects[std::stoi(numeral_string)];
+				if ((digits - i) % 3 == 1 && i != digits - 1) {
+					sprite.setTextureRect(comma_rect);
+					sprite.setPosition(x + x_offset, y);
+					window->draw(sprite);
+					x_offset -= numeral_rect.width;
+				}
 				sprite.setTextureRect(numeral_rect);
 				sprite.setPosition(x + x_offset, y);
 				window->draw(sprite);
 				if (i == 0) {
 					break;
+				}
+				if ((digits - i) % 3 == 0) {
+					x_offset -= comma_rect.width;
+					continue;
 				}
 				numeral_string[0] = number_string[i - 1];
 				numeral_rect = numeral_rects[std::stoi(numeral_string)];
@@ -239,7 +253,7 @@ int main()
 
 	sf::Texture numeral_texture;
 	numeral_texture.loadFromFile("../res/numerals.png");
-	NumberRenderer number_renderer(numeral_texture, {
+	NumberRenderer number_renderer(numeral_texture, sf::IntRect(134, 0, 10, 16), {
 		sf::IntRect(0, 0, 14, 16),
 		sf::IntRect(14, 0, 8, 16),
 		sf::IntRect(22, 0, 14, 16),
@@ -403,6 +417,8 @@ int main()
 					}
 				}
 			} else {
+				tiles += block.get_tiles().size();
+				blocks++;
 				for (auto tile : block.get_tiles()) {
 					grid[tile.y][tile.x] = block.type->tile_type;
 				}
@@ -428,8 +444,6 @@ int main()
 				}
 			}
 			block = Block();
-			tiles += block.get_tiles().size();
-			blocks++;
 		} else if(is_update_frame) {
 			block.position.y++;
 		}
