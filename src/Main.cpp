@@ -12,6 +12,7 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Window.hpp>
 #include <SFML/Window/WindowStyle.hpp>
+#include <algorithm>
 #include <initializer_list>
 #include <iostream>
 #include <iterator>
@@ -130,11 +131,30 @@ class BlockType {
 		}
 		TileType* tile_type;
 		std::vector<std::vector<bool>> grid;
+		uint width, height, starting_line;
 		bool rotate;
 		BlockType(TileType* _tile_type, const std::vector<std::vector<bool>> _grid, bool _rotate = true) {
 			tile_type = _tile_type;
 			grid = _grid;
 			rotate = _rotate;
+			// Used for alignment in "next block" area
+			width = 0;
+			starting_line = 0;
+			for (uint y = 0; y < grid.size(); y++) {
+				bool has_content = false;
+				for (uint x = 0; x < grid[y].size(); x++) {
+					if (grid[y][x]) {
+						width = std::max({width, x + 1});
+						has_content = true;
+					}
+				}
+				if (has_content) {
+					if (height == 0) {
+						starting_line = y;
+					}
+					height = y + 1 - starting_line;
+				}
+			}
 		}
 };
 
@@ -238,6 +258,7 @@ int main()
 	window.setFramerateLimit(60);
 	
 	Block block;
+	Block next_block;
 
 	TileType* grid[GRID_HEIGHT][GRID_WIDTH] = { nullptr };
 
@@ -404,6 +425,21 @@ int main()
 			}
 		}
 
+		// Draw next block
+		auto next_block_tiles = next_block.get_tiles();
+		// This is assuming the next block spawns unrotated.
+		// Refactoring is needed if random rotations are added
+		uint x_offset = next_block.type->width * TILE_SIZE / 2;
+		uint y_offset = (next_block.type->height + next_block.type->starting_line * 2) * TILE_SIZE / 2;
+		for (auto tile : next_block_tiles) {
+			sprite.setTextureRect(next_block.type->tile_type->texture_rect);
+			sprite.setPosition(
+				370 + (tile.x - next_block.position.x) * TILE_SIZE - x_offset,
+				70 + (tile.y - next_block.position.y) * TILE_SIZE - y_offset
+			);
+			window.draw(sprite);
+		}
+
 		// Landing (transfering block to grid and reinitializing)
 		if (landed) {
 			if (block.position.y == 0) {
@@ -443,7 +479,8 @@ int main()
 					update_interval -= 10;
 				}
 			}
-			block = Block();
+			block = next_block;
+			next_block = Block();
 		} else if(is_update_frame) {
 			block.position.y++;
 		}
