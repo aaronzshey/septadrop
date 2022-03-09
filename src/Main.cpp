@@ -306,9 +306,11 @@ int main()
 		sf::IntRect(120, 0, 14, 16)
 	});
 
-	bool rotate = true;
-	bool move_left = true;
-	bool move_right = true;
+	bool rotate = false;
+	bool move_left = false;
+	bool move_right = false;
+	bool move_left_immediate = false;
+	bool move_right_immediate = false;
 	bool snap = false;
 	sf::Clock update_clock;
 	sf::Clock move_clock;
@@ -341,14 +343,29 @@ int main()
 							break;
 						case sf::Keyboard::Left:
 							move_left = true;
+							move_left_immediate = true;
+							move_clock.restart();
 							break;
 						case sf::Keyboard::Right:
 							move_right = true;
+							move_right_immediate = true;
+							move_clock.restart();
 							break;
 						default:
 							break;
 					}
 					break;
+				case sf::Event::KeyReleased:
+					switch (event.key.code) {
+						case sf::Keyboard::Left:
+							move_left = false;
+							break;
+						case sf::Keyboard::Right:
+							move_right = false;
+							break;
+						default:
+							break;
+					}
 				default:
 					break;
 			}
@@ -359,7 +376,7 @@ int main()
 			update_clock.restart();
 		}
 
-		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() > 200;
+		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() > 125;
 		if (is_move_frame) {
 			move_clock.restart();
 		}
@@ -379,13 +396,13 @@ int main()
 
 		// Horizontal movement
 		int movement = 0;
-		if (move_left || is_move_frame && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+		if (move_left_immediate || is_move_frame && move_left) {
 			movement--;
-			move_left = false;
+			move_left_immediate = false;
 		}
-		if (move_right || is_move_frame && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+		if (move_right_immediate || is_move_frame && move_right) {
 			movement++;
-			move_right = false;
+			move_right_immediate = false;
 		}
 		if (movement != 0) {
 			for (auto tile : block.get_tiles()) {
