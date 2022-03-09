@@ -29,6 +29,12 @@
 #define PLAYFIELD_X 20
 #define PLAYFIELD_Y 20
 
+#define LINES_PER_LEVEL 5
+#define POINTS_1_LINE 40
+#define POINTS_2_LINES 100
+#define POINTS_3_LINES 300
+#define POINTS_4_LINES 1200
+
 class NumberRenderer {
 	public:
 		sf::Texture texture;
@@ -294,6 +300,7 @@ int main()
 	sf::Clock update_clock;
 	sf::Clock move_clock;
 
+	uint score = 0;
 	uint lines = 0;
 	uint blocks = 0;
 	uint tiles = 0;
@@ -443,7 +450,7 @@ int main()
 		// Landing (transfering block to grid and reinitializing)
 		if (landed) {
 			if (block.position.y == 0) {
-				update_interval += lines * 10;
+				score = 0;
 				lines = 0;
 				blocks = 0;
 				tiles = 0;
@@ -458,6 +465,7 @@ int main()
 				for (auto tile : block.get_tiles()) {
 					grid[tile.y][tile.x] = block.type->tile_type;
 				}
+				uint cleared_lines = 0;
 				// Check for completed rows
 				for (int y = 0; y < GRID_HEIGHT; y++) {
 					bool completed = true;
@@ -475,9 +483,29 @@ int main()
 							grid[z + 1][x] = grid[z][x];
 						}
 					}
-					lines++;
-					update_interval -= 10;
+					cleared_lines++;
 				}
+				uint scored;
+				switch (cleared_lines) {
+					case 0:
+						scored = 0;
+						break;
+					case 1:
+						scored = POINTS_1_LINE;
+						break;
+					case 2:
+						scored = POINTS_2_LINES;
+						break;
+					case 3:
+						scored = POINTS_3_LINES;
+						break;
+					default:
+						scored = POINTS_4_LINES;
+						break;
+				}
+				scored *= (lines / LINES_PER_LEVEL) + 1;
+				score += scored;
+				lines += cleared_lines;
 			}
 			block = next_block;
 			next_block = Block();
@@ -499,7 +527,10 @@ int main()
 			}
 		}
 
+		number_renderer.render(&window, score, 477, 162);
+		number_renderer.render(&window, score, 477, 202);
 		number_renderer.render(&window, lines, 477, 242);
+		number_renderer.render(&window, lines / LINES_PER_LEVEL, 477, 282);
 		number_renderer.render(&window, blocks, 477, 322);
 		number_renderer.render(&window, tiles, 477, 362);
 
