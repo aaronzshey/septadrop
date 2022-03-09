@@ -294,11 +294,11 @@ int main()
 	sf::Clock update_clock;
 	sf::Clock move_clock;
 
-	int lines = 0;
-	int blocks = 0;
-	int tiles = 0;
+	uint lines = 0;
+	uint blocks = 0;
+	uint tiles = 0;
 
-	int update_interval = 250;
+	uint update_interval = 250;
 
 	auto clear_color = sf::Color(73, 52, 61);
 
