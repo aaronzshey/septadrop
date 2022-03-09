@@ -1,4 +1,6 @@
-
+#include <SFML/Audio.hpp>
+#include <SFML/Audio/Sound.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
@@ -346,6 +348,48 @@ int main()
 
 	uint update_interval = get_update_interval(0);
 
+	// https://sfxr.me/#57uBnWWZeyDTsBRrJsAp2Vwd76cMVrdeRQ7DirNQW5XekKxcrCUNx47Zggh7Uqw4R5FdeUpyk362uhjWmpNHmqxE7JBp3EkxDxfJ1VjzMRpuSHieW6B5iyVFM
+	sf::SoundBuffer rotate_buffer;
+	rotate_buffer.loadFromFile("../res/rotate.wav");
+
+	sf::Sound rotate_sound;
+	rotate_sound.setBuffer(rotate_buffer);
+
+	// https://sfxr.me/#57uBnWTMa2LUtaPa3P8xWZekiRxNwCPFWpRoPDVXDJM9KHkiGJcs6J62FRcjMY5oVNdT73MtmUf5rXCPvSZWL7AZuTRWWjKbPKTpZjT85AcZ6htUqTswkjksZ
+	sf::SoundBuffer snap_buffer;
+	snap_buffer.loadFromFile("../res/snap.wav");
+
+	sf::Sound snap_sound;
+	snap_sound.setBuffer(snap_buffer);
+
+	// https://sfxr.me/#57uBnWbareN7MJJsWGD8eFCrqjikS9f8JXg8jvmKzMdVtqmRsb81eToSUpnkqgFhvxD2QoAjpw4SmGZHZjbhEiPQKetRSHCHXYFZzD7Q6RVVS9CRSeRAb6bZp
+	sf::SoundBuffer game_over_buffer;
+	game_over_buffer.loadFromFile("../res/game_over.wav");
+
+	sf::Sound game_over_sound;
+	game_over_sound.setBuffer(game_over_buffer);
+
+	// https://sfxr.me/#7BMHBGMfGk8EHV8czJkUucUm8EMAnMNxiqYyTfKkMpHFJu44GEdD7xP6E8NM3K7RKRExTpagPBAiWf7BLtC52CEWJVGHh8hwDLygoEG86tcPth2UtmfdrXLoh
+	sf::SoundBuffer row_clear_buffer;
+	row_clear_buffer.loadFromFile("../res/row_clear.wav");
+
+	sf::Sound row_clear_sound;
+	row_clear_sound.setBuffer(row_clear_buffer);
+
+	// https://sfxr.me/#57uBnWg8448kTPqWAxeDvZ5CP5JWbrfJGWuRcTjva5uX3vvBnEAZ6SfiH9oLKMXgsusuJwGWx6KPfvLfHtqnhLxr476ptGv4jPbfNhQaFMYeMHFdHk9SotQ4X
+	sf::SoundBuffer level_up_buffer;
+	level_up_buffer.loadFromFile("../res/level_up.wav");
+
+	sf::Sound level_up_sound;
+	level_up_sound.setBuffer(level_up_buffer);
+
+	// https://sfxr.me/#34T6PkzvrkfdahGDBAh1uYGXTwZ8rG54kxfHpgdVCPxqG7yyK5UuqgiK9Z8Q5177itxbkSNfLSHm4zTkemT4iyxJpW89VJx82feaq8qxZeA5AJR2nWZZR59hq
+	sf::SoundBuffer new_highscore_buffer;
+	new_highscore_buffer.loadFromFile("../res/new_highscore.wav");
+
+	sf::Sound new_highscore_sound;
+	new_highscore_sound.setBuffer(new_highscore_buffer);
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -414,6 +458,7 @@ int main()
 				}
 			}
 			rotate = false;
+			rotate_sound.play();
 		}
 
 		// Horizontal movement
@@ -452,6 +497,7 @@ int main()
 		if (snap) {
 			block.position.y += snap_offset;
 			snap = false;
+			snap_sound.play();
 		}
 
 		// Land checking
@@ -509,6 +555,7 @@ int main()
 						grid[y][x] = nullptr;
 					}
 				}
+				game_over_sound.play();
 			} else {
 				tiles += block.get_tiles().size();
 				blocks++;
@@ -553,17 +600,26 @@ int main()
 						scored = POINTS_4_LINES;
 						break;
 				}
-				int level = get_level(lines);
-				scored *= level + 1;
-				score += scored;
-				lines += cleared_lines;
-				if (score > highscore) {
-					highscore = score;
-					std::ofstream highscore_file(highscore_file_path);
-					highscore_file << highscore;
-					highscore_file.close();
+				if (scored > 0) {
+					int level = get_level(lines);
+					scored *= level + 1;
+					if (score + scored > highscore && score < highscore) {
+						new_highscore_sound.play();
+					}
+					score += scored;
+					lines += cleared_lines;
+					if (level != get_level(lines)) {
+						level_up_sound.play();
+					}
+					if (score > highscore) {
+						highscore = score;
+						std::ofstream highscore_file(highscore_file_path);
+						highscore_file << highscore;
+						highscore_file.close();
+					}
+					update_interval = get_update_interval(level);
+					row_clear_sound.play();
 				}
-				update_interval = get_update_interval(level);
 			}
 			block = next_block;
 			next_block = Block();
