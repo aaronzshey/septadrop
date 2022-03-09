@@ -20,6 +20,11 @@
 #include <iterator>
 #include <string>
 #include <math.h>
+#include <fstream>
+#include <filesystem>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
 
 #define TILE_SIZE 20
 
@@ -315,6 +320,25 @@ int main()
 	sf::Clock update_clock;
 	sf::Clock move_clock;
 
+	// https://stackoverflow.com/a/478088
+	const char *homedir;
+	if ((homedir = getenv("HOME")) == NULL) {
+		homedir = getpwuid(getuid())->pw_dir;
+	}
+
+	std::string highscore_file_path = homedir;
+	highscore_file_path += "/.elnutris";
+
+	if (!std::filesystem::exists(highscore_file_path)) {
+		std::ofstream highscore_file(highscore_file_path);
+		highscore_file << "0";
+		highscore_file.close();
+	}
+	std::fstream highscore_file(highscore_file_path);
+	std::string highscore_string;
+	highscore_file >> highscore_string;
+	uint highscore = std::stoi(highscore_string);
+
 	uint score = 0;
 	uint lines = 0;
 	uint blocks = 0;
@@ -535,6 +559,12 @@ int main()
 				scored *= level + 1;
 				score += scored;
 				lines += cleared_lines;
+				if (score > highscore) {
+					highscore = score;
+					std::ofstream highscore_file(highscore_file_path);
+					highscore_file << highscore;
+					highscore_file.close();
+				}
 				update_interval = get_update_interval(level);
 			}
 			block = next_block;
@@ -558,7 +588,7 @@ int main()
 		}
 
 		number_renderer.render(&window, score, 477, 162);
-		number_renderer.render(&window, score, 477, 202);
+		number_renderer.render(&window, highscore, 477, 202);
 		number_renderer.render(&window, lines, 477, 242);
 		number_renderer.render(&window, get_level(lines), 477, 282);
 		number_renderer.render(&window, blocks, 477, 322);
