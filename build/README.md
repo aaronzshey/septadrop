@@ -11,5 +11,5 @@ cmake ..
 To compile and run:
 
 ```SH
-make && ./elnutris
+cmake --build . && ./elnutris
 ```
