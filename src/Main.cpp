@@ -346,8 +346,6 @@ int main()
 
 	uint update_interval = get_update_interval(0);
 
-	auto clear_color = sf::Color(73, 52, 61);
-
 	while (window.isOpen())
 	{
 		sf::Event event;
