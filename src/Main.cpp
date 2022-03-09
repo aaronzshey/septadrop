@@ -9,14 +9,17 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Window/Event.hpp>
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Window.hpp>
 #include <SFML/Window/WindowStyle.hpp>
 #include <algorithm>
+#include <cmath>
 #include <initializer_list>
 #include <iostream>
 #include <iterator>
 #include <string>
+#include <math.h>
 
 #define TILE_SIZE 20
 
@@ -256,12 +259,22 @@ class Block {
 		}
 };
 
+uint get_level(int lines) {
+	return std::min(lines / LINES_PER_LEVEL, 15);
+}
+
+uint get_update_interval(int level) {
+	// From Tetris Worlds, see https://harddrop.com/wiki/Tetris_Worlds#Gravity
+	return pow(0.8 - (level - 1) * 0.007, level - 1) * 1000;
+}
+
 int main()
 {
 	srand(time(NULL));
 	
 	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "elnutris", sf::Style::Close);
 	window.setFramerateLimit(60);
+	window.setKeyRepeatEnabled(false); // prevent keys from retriggering when held
 	
 	Block block;
 	Block next_block;
@@ -305,7 +318,7 @@ int main()
 	uint blocks = 0;
 	uint tiles = 0;
 
-	uint update_interval = 250;
+	uint update_interval = get_update_interval(0);
 
 	auto clear_color = sf::Color(73, 52, 61);
 
@@ -341,18 +354,18 @@ int main()
 			}
 		}
 
-		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() > (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ? update_interval / 2 : update_interval);
+		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() > (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ? std::min({update_interval, 125u}) : update_interval);
 		if (is_update_frame) {
 			update_clock.restart();
 		}
 
-		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() > update_interval / 2;
+		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() > 200;
 		if (is_move_frame) {
 			move_clock.restart();
 		}
 
 		// Rotation
-		if (rotate && is_move_frame) {
+		if (rotate) {
 			block.rotation_state++;
 			// Check to see if new rotation state is overlapping any tiles
 			for (auto tile : block.get_tiles()) {
@@ -365,24 +378,22 @@ int main()
 		}
 
 		// Horizontal movement
-		if (is_move_frame) {
-			int movement = 0;
-			if (move_left || sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
-				movement--;
-				move_left = false;
-			}
-			if (move_right ||sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
-				movement++;
-				move_right = false;
-			}
-			if (movement != 0) {
-				for (auto tile : block.get_tiles()) {
-					if (tile.x + movement < 0 || tile.x + movement >= GRID_WIDTH || grid[tile.y][tile.x + movement]) {
-						goto after_movement_loop;
-					}
+		int movement = 0;
+		if (move_left || is_move_frame && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left)) {
+			movement--;
+			move_left = false;
+		}
+		if (move_right || is_move_frame && sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right)) {
+			movement++;
+			move_right = false;
+		}
+		if (movement != 0) {
+			for (auto tile : block.get_tiles()) {
+				if (tile.x + movement < 0 || tile.x + movement >= GRID_WIDTH || grid[tile.y][tile.x + movement]) {
+					goto after_movement_loop;
 				}
-				block.position.x += movement;
 			}
+			block.position.x += movement;
 		}
 		after_movement_loop:
 
@@ -503,9 +514,11 @@ int main()
 						scored = POINTS_4_LINES;
 						break;
 				}
-				scored *= (lines / LINES_PER_LEVEL) + 1;
+				int level = get_level(lines);
+				scored *= level + 1;
 				score += scored;
 				lines += cleared_lines;
+				update_interval = get_update_interval(level);
 			}
 			block = next_block;
 			next_block = Block();
@@ -530,7 +543,7 @@ int main()
 		number_renderer.render(&window, score, 477, 162);
 		number_renderer.render(&window, score, 477, 202);
 		number_renderer.render(&window, lines, 477, 242);
-		number_renderer.render(&window, lines / LINES_PER_LEVEL, 477, 282);
+		number_renderer.render(&window, get_level(lines), 477, 282);
 		number_renderer.render(&window, blocks, 477, 322);
 		number_renderer.render(&window, tiles, 477, 362);
 
