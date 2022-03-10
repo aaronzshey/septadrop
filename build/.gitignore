@@ -1,3 +1,6 @@
 *
 !README.md
 !.gitignore
+!packer.py
+!build.sh
+!run.sh
