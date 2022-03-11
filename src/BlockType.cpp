@@ -1,7 +1,4 @@
-#include <cstdlib>
-
 #include <BlockType.hpp>
-#include <TileType.hpp>
 
 BlockType::BlockType(TileType* _tile_type, const std::vector<std::vector<bool>> _grid, bool _rotate) {
 	tile_type = _tile_type;
@@ -25,4 +22,94 @@ BlockType::BlockType(TileType* _tile_type, const std::vector<std::vector<bool>> 
 			height = y + 1 - starting_line;
 		}
 	}
+}
+
+BlockType* BlockType::random() {
+	init();
+	return &list[rand() % list.size()];
+}
+
+void BlockType::init() {
+	if (inited) {
+		return;
+	}
+
+	// I block
+	list.push_back(BlockType(new TileType(
+			sf::IntRect(0,             0, TILE_SIZE, TILE_SIZE),
+			sf::IntRect(0,             TILE_SIZE, TILE_SIZE, TILE_SIZE)
+		), {
+			{0, 0, 0, 0},
+			{1, 1, 1, 1},
+			{0, 0, 0, 0},
+			{0, 0, 0, 0}
+		}
+	));
+
+	// J Block OK
+	list.push_back(BlockType(new TileType(
+			sf::IntRect(TILE_SIZE,     0, TILE_SIZE, TILE_SIZE),
+			sf::IntRect(TILE_SIZE,     TILE_SIZE, TILE_SIZE, TILE_SIZE)
+		), {
+			{1, 0, 0},
+			{1, 1, 1},
+			{0, 0, 0}
+		}
+	));
+
+	// L Block
+	list.push_back(BlockType(new TileType(
+			sf::IntRect(TILE_SIZE * 2, 0, TILE_SIZE, TILE_SIZE),
+			sf::IntRect(TILE_SIZE * 2, TILE_SIZE, TILE_SIZE, TILE_SIZE)
+		), {
+			{0, 0, 1},
+			{1, 1, 1},
+			{0, 0, 0}
+		}
+	));
+
+	// O Block
+	list.push_back(BlockType(new TileType(
+			sf::IntRect(TILE_SIZE * 3, 0, TILE_SIZE, TILE_SIZE),
+			sf::IntRect(TILE_SIZE * 3, TILE_SIZE, TILE_SIZE, TILE_SIZE)
+		), {
+			{1, 1},
+			{1, 1}
+		}, false
+	));
+
+	// S Block OK
+	list.push_back(BlockType(new TileType(
+			sf::IntRect(TILE_SIZE * 4, 0, TILE_SIZE, TILE_SIZE),
+			sf::IntRect(TILE_SIZE * 4, TILE_SIZE, TILE_SIZE, TILE_SIZE)
+		), {
+			{0, 1, 1},
+			{1, 1, 0},
+			{0, 0, 0}
+		}
+	));
+
+	// T Block OK
+	list.push_back(BlockType(new TileType(
+			sf::IntRect(TILE_SIZE * 5, 0, TILE_SIZE, TILE_SIZE),
+			sf::IntRect(TILE_SIZE * 5, TILE_SIZE, TILE_SIZE, TILE_SIZE)
+		), {
+			{0, 1, 0},
+			{1, 1, 1},
+			{0, 0, 0}
+		}
+	));
+
+	// Z Block OK
+	list.push_back(BlockType(new TileType(
+			sf::IntRect(TILE_SIZE * 6, 0, TILE_SIZE, TILE_SIZE),
+			sf::IntRect(TILE_SIZE * 6, TILE_SIZE, TILE_SIZE, TILE_SIZE)
+		), {
+			{1, 1, 0},
+			{0, 1, 1},
+			{0, 0, 0}
+		}
+	));
+
+	inited = true;
 }
