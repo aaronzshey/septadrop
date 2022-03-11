@@ -27,7 +27,16 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <pwd.h>
-#include <res.hpp>
+
+#include <packed/background_texture_data.hpp>
+#include <packed/blocks_texture_data.hpp>
+#include <packed/game_over_audio_data.hpp>
+#include <packed/level_up_audio_data.hpp>
+#include <packed/new_highscore_audio_data.hpp>
+#include <packed/numerals_texture_data.hpp>
+#include <packed/rotate_audio_data.hpp>
+#include <packed/row_clear_audio_data.hpp>
+#include <packed/snap_audio_data.hpp>
 
 #define TILE_SIZE 20
 
@@ -289,18 +298,18 @@ int main()
 
 	TileType* grid[GRID_HEIGHT][GRID_WIDTH] = { nullptr };
 
-	sf::Texture texture;
-	texture.loadFromMemory(&TEXTURE, sizeof(TEXTURE));
+	sf::Texture blocks_texture;
+	blocks_texture.loadFromMemory(&BLOCKS_TEXTURE_DATA, sizeof(BLOCKS_TEXTURE_DATA));
 	sf::Sprite sprite;
-	sprite.setTexture(texture);
+	sprite.setTexture(blocks_texture);
 
 	sf::Texture background_texture;
-	background_texture.loadFromMemory(&BACKGROUND, sizeof(BACKGROUND));
+	background_texture.loadFromMemory(&BACKGROUND_TEXTURE_DATA, sizeof(BACKGROUND_TEXTURE_DATA));
 	sf::Sprite background;
 	background.setTexture(background_texture);
 
 	sf::Texture numeral_texture;
-	numeral_texture.loadFromMemory(&NUMERALS, sizeof(NUMERALS));
+	numeral_texture.loadFromMemory(&NUMERALS_TEXTURE_DATA, sizeof(NUMERALS_TEXTURE_DATA));
 	NumberRenderer number_renderer(numeral_texture, sf::IntRect(134, 0, 10, 16), {
 		sf::IntRect(0, 0, 14, 16),
 		sf::IntRect(14, 0, 8, 16),
@@ -351,42 +360,42 @@ int main()
 
 	// https://sfxr.me/#57uBnWWZeyDTsBRrJsAp2Vwd76cMVrdeRQ7DirNQW5XekKxcrCUNx47Zggh7Uqw4R5FdeUpyk362uhjWmpNHmqxE7JBp3EkxDxfJ1VjzMRpuSHieW6B5iyVFM
 	sf::SoundBuffer rotate_buffer;
-	rotate_buffer.loadFromMemory(&ROTATE, sizeof(ROTATE));
+	rotate_buffer.loadFromMemory(&ROTATE_AUDIO_DATA, sizeof(ROTATE_AUDIO_DATA));
 
 	sf::Sound rotate_sound;
 	rotate_sound.setBuffer(rotate_buffer);
 
 	// https://sfxr.me/#57uBnWTMa2LUtaPa3P8xWZekiRxNwCPFWpRoPDVXDJM9KHkiGJcs6J62FRcjMY5oVNdT73MtmUf5rXCPvSZWL7AZuTRWWjKbPKTpZjT85AcZ6htUqTswkjksZ
 	sf::SoundBuffer snap_buffer;
-	snap_buffer.loadFromMemory(&SNAP, sizeof(SNAP));
+	snap_buffer.loadFromMemory(&SNAP_AUDIO_DATA, sizeof(SNAP_AUDIO_DATA));
 
 	sf::Sound snap_sound;
 	snap_sound.setBuffer(snap_buffer);
 
 	// https://sfxr.me/#57uBnWbareN7MJJsWGD8eFCrqjikS9f8JXg8jvmKzMdVtqmRsb81eToSUpnkqgFhvxD2QoAjpw4SmGZHZjbhEiPQKetRSHCHXYFZzD7Q6RVVS9CRSeRAb6bZp
 	sf::SoundBuffer game_over_buffer;
-	game_over_buffer.loadFromMemory(&GAME_OVER, sizeof(GAME_OVER));
+	game_over_buffer.loadFromMemory(&GAME_OVER_AUDIO_DATA, sizeof(GAME_OVER_AUDIO_DATA));
 
 	sf::Sound game_over_sound;
 	game_over_sound.setBuffer(game_over_buffer);
 
 	// https://sfxr.me/#7BMHBGMfGk8EHV8czJkUucUm8EMAnMNxiqYyTfKkMpHFJu44GEdD7xP6E8NM3K7RKRExTpagPBAiWf7BLtC52CEWJVGHh8hwDLygoEG86tcPth2UtmfdrXLoh
 	sf::SoundBuffer row_clear_buffer;
-	row_clear_buffer.loadFromMemory(&ROW_CLEAR, sizeof(ROW_CLEAR));
+	row_clear_buffer.loadFromMemory(&ROW_CLEAR_AUDIO_DATA, sizeof(ROW_CLEAR_AUDIO_DATA));
 
 	sf::Sound row_clear_sound;
 	row_clear_sound.setBuffer(row_clear_buffer);
 
 	// https://sfxr.me/#57uBnWg8448kTPqWAxeDvZ5CP5JWbrfJGWuRcTjva5uX3vvBnEAZ6SfiH9oLKMXgsusuJwGWx6KPfvLfHtqnhLxr476ptGv4jPbfNhQaFMYeMHFdHk9SotQ4X
 	sf::SoundBuffer level_up_buffer;
-	level_up_buffer.loadFromMemory(&LEVEL_UP, sizeof(LEVEL_UP));
+	level_up_buffer.loadFromMemory(&LEVEL_UP_AUDIO_DATA, sizeof(LEVEL_UP_AUDIO_DATA));
 
 	sf::Sound level_up_sound;
 	level_up_sound.setBuffer(level_up_buffer);
 
 	// https://sfxr.me/#34T6PkzvrkfdahGDBAh1uYGXTwZ8rG54kxfHpgdVCPxqG7yyK5UuqgiK9Z8Q5177itxbkSNfLSHm4zTkemT4iyxJpW89VJx82feaq8qxZeA5AJR2nWZZR59hq
 	sf::SoundBuffer new_highscore_buffer;
-	new_highscore_buffer.loadFromMemory(&NEW_HIGHSCORE, sizeof(NEW_HIGHSCORE));
+	new_highscore_buffer.loadFromMemory(&NEW_HIGHSCORE_AUDIO_DATA, sizeof(NEW_HIGHSCORE_AUDIO_DATA));
 
 	sf::Sound new_highscore_sound;
 	new_highscore_sound.setBuffer(new_highscore_buffer);
