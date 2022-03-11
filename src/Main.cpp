@@ -1,5 +1,7 @@
+#include "packed/textures/icon_texture_data.hpp"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Image.hpp>
 #include <initializer_list>
 #include <iterator>
 #include <math.h>
@@ -42,6 +44,11 @@ int main()
 	window.setFramerateLimit(60);
 	window.setKeyRepeatEnabled(false); // prevent keys from retriggering when held
 	
+	sf::Image icon;
+	icon.loadFromMemory(ICON_TEXTURE_DATA, sizeof(ICON_TEXTURE_DATA));
+	auto icon_size = icon.getSize();
+	window.setIcon(icon_size.x, icon_size.y, icon.getPixelsPtr());
+
 	Block block;
 	Block next_block;
 

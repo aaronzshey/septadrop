@@ -1,0 +1,10 @@
+Package: septadrop
+Version: 1.0
+Architecture: amd64
+Essential: no
+Priority: optional
+Maintainer: ElnuDev <elnu@elnu.com>
+Description: A block game made in C++ and SFML.
+Homepage: https://github.com/ElnuDev/septadrop
+Vcs-Browser: https://github.com/ElnuDev/septadrop
+Vcs-Git: https://github.com/ElnuDev/septadrop.git

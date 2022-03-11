@@ -1,6 +1,8 @@
-*
-!README.md
-!.gitignore
-!packer.py
-!build.sh
-!run.sh
+CMakeFiles
+cmake_install.cmake
+CMakeCache.txt
+compile_commands.json
+Makefile
+septadrop
+septadrop_1.0_amd64/usr/bin/septadrop
+septadrop_1.0_amd64.deb

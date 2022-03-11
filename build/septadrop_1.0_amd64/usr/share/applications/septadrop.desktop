@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Name=septadrop
+GenericName=septadrop
+Comment=A block game made in C++ and SFML.
+Exec=/usr/bin/septadrop
+TryExec=/usr/bin/septadrop
+Icon=/usr/share/icons/septadrop-icon.xpm
+Terminal=false
+Type=Application
+# https://askubuntu.com/a/674411
+Categories=Game;ArcadeGame;2DGraphics
+Keywords=tetris;
