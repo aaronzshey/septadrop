@@ -46,7 +46,7 @@ void BlockType::init() {
 		}
 	));
 
-	// J Block OK
+	// J Block
 	list.push_back(BlockType(new TileType(
 			sf::IntRect(TILE_SIZE,     0, TILE_SIZE, TILE_SIZE),
 			sf::IntRect(TILE_SIZE,     TILE_SIZE, TILE_SIZE, TILE_SIZE)
@@ -78,7 +78,7 @@ void BlockType::init() {
 		}, false
 	));
 
-	// S Block OK
+	// S Block
 	list.push_back(BlockType(new TileType(
 			sf::IntRect(TILE_SIZE * 4, 0, TILE_SIZE, TILE_SIZE),
 			sf::IntRect(TILE_SIZE * 4, TILE_SIZE, TILE_SIZE, TILE_SIZE)
@@ -89,7 +89,7 @@ void BlockType::init() {
 		}
 	));
 
-	// T Block OK
+	// T Block
 	list.push_back(BlockType(new TileType(
 			sf::IntRect(TILE_SIZE * 5, 0, TILE_SIZE, TILE_SIZE),
 			sf::IntRect(TILE_SIZE * 5, TILE_SIZE, TILE_SIZE, TILE_SIZE)
@@ -100,7 +100,7 @@ void BlockType::init() {
 		}
 	));
 
-	// Z Block OK
+	// Z Block
 	list.push_back(BlockType(new TileType(
 			sf::IntRect(TILE_SIZE * 6, 0, TILE_SIZE, TILE_SIZE),
 			sf::IntRect(TILE_SIZE * 6, TILE_SIZE, TILE_SIZE, TILE_SIZE)
