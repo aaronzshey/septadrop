@@ -1,0 +1,16 @@
+#define TILE_SIZE 20
+
+#define GRID_WIDTH 14
+#define GRID_HEIGHT 20
+
+#define WINDOW_WIDTH 500
+#define WINDOW_HEIGHT 440
+
+#define PLAYFIELD_X 20
+#define PLAYFIELD_Y 20
+
+#define LINES_PER_LEVEL 5
+#define POINTS_1_LINE 40
+#define POINTS_2_LINES 100
+#define POINTS_3_LINES 300
+#define POINTS_4_LINES 1200
