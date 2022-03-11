@@ -15,6 +15,15 @@ To compile and run:
 ```
 
 To run:
-```
+```SH
 ./septadrop
+```
+
+## Packaging
+
+### Debian
+
+To package:
+```SH
+./debian.sh
 ```
