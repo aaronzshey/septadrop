@@ -8,16 +8,7 @@
 #include <unistd.h>
 #include <pwd.h>
 
-#include <packed/audio/game_over_audio_data.hpp>
-#include <packed/audio/level_up_audio_data.hpp>
-#include <packed/audio/new_highscore_audio_data.hpp>
-#include <packed/audio/rotate_audio_data.hpp>
-#include <packed/audio/row_clear_audio_data.hpp>
-#include <packed/audio/snap_audio_data.hpp>
-
-#include <packed/textures/background_texture_data.hpp>
-#include <packed/textures/blocks_texture_data.hpp>
-#include <packed/textures/numerals_texture_data.hpp>
+#include <packed/SharedResources.hpp>
 
 #include <Config.hpp>
 #include <NumberRenderer.hpp>

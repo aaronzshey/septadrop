@@ -2,6 +2,7 @@ import os, shutil
 
 RES_DIR = "../res/"
 PACKED_DIR = "../include/packed/"
+SHARED_HEADER_PATH = f"{PACKED_DIR}/SharedResources.hpp"
 
 resources = os.fsencode(RES_DIR)
 os.makedirs(PACKED_DIR, exist_ok=True)
@@ -14,6 +15,8 @@ for filename in os.listdir(packed_dir):
 	elif os.path.isdir(file_path):
 		shutil.rmtree(file_path)
 
+shared_header = "#pragma once\n\n"
+
 for folder in os.listdir(resources):
 	folder_path = os.path.join(resources, folder)
 	if os.path.isfile(folder_path):
@@ -23,7 +26,7 @@ for folder in os.listdir(resources):
 	for resource in os.listdir(folder_path):
 		resource_path = os.path.join(folder_path, resource)
 
-		res = ""
+		res = "#pragma once\n\n"
 
 		splitext = os.path.splitext(resource)
 		name = splitext[0].decode()
@@ -45,5 +48,10 @@ for folder in os.listdir(resources):
 			bytes_processed += 1
 		encoded = encoded[:-2] + "\n};"
 		res += encoded + "\n"
-		with open(os.path.join(packed_path.decode(), f"{name}.hpp"), "w") as f:
+		header_name = f"{name}.hpp"
+		with open(os.path.join(packed_path.decode(), header_name), "w") as f:
 			f.write(res)
+		shared_header += f'#include "{folder.decode()}/{header_name}"\n'
+
+with open(SHARED_HEADER_PATH, "w") as f:
+	f.write(shared_header)
