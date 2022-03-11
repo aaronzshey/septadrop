@@ -16,5 +16,5 @@ To compile and run:
 
 To run:
 ```
-./elnutris
+./septadrop
 ```

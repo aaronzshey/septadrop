@@ -29,7 +29,7 @@ int main()
 {
 	srand(time(NULL));
 	
-	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "elnutris", sf::Style::Close);
+	sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "septadrop", sf::Style::Close);
 	window.setFramerateLimit(60);
 	window.setKeyRepeatEnabled(false); // prevent keys from retriggering when held
 	
@@ -79,7 +79,7 @@ int main()
 	}
 
 	std::string highscore_file_path = homedir;
-	highscore_file_path += "/.elnutris";
+	highscore_file_path += "/.septadrop";
 
 	if (!std::filesystem::exists(highscore_file_path)) {
 		std::ofstream highscore_file(highscore_file_path);
