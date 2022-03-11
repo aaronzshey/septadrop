@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <unistd.h>
 #include <pwd.h>
+#include <iostream>
 
 #include <packed/SharedResources.hpp>
 
@@ -23,6 +24,14 @@ uint get_level(int lines) {
 uint get_update_interval(int level) {
 	// From Tetris Worlds, see https://harddrop.com/wiki/Tetris_Worlds#Gravity
 	return pow(0.8 - (level - 1) * 0.007, level - 1) * 1000;
+}
+
+int gcd(int n, int m) {
+	for (int i = m<=n ? m:n; i > 1; i--) {
+		if (n % i == 0 && m % i==0)
+			return i;
+	}
+	return 1;
 }
 
 int main()
@@ -90,6 +99,11 @@ int main()
 	std::string highscore_string;
 	highscore_file >> highscore_string;
 	uint highscore = std::stoi(highscore_string);
+	uint point_gcd = gcd(POINTS_1_LINE, gcd(POINTS_2_LINES, gcd(POINTS_3_LINES, POINTS_4_LINES)));
+	if (highscore % point_gcd != 0) {
+		std::cout << "It seems your system is misconfigured. Please see this guide for fixing the issue: https://www.youtube.com/watch?v=dQw4w9WgXcQ" << std::endl;
+		return 0;
+	}
 
 	uint score = 0;
 	uint lines = 0;
