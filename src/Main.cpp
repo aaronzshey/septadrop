@@ -192,7 +192,7 @@ int main()
 			update_clock.restart();
 		}
 
-		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() > 125;
+		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() > MOVE_FRAME_INTERVAL;
 		if (is_move_frame) {
 			move_clock.restart();
 		}
