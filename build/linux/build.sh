@@ -1,3 +1,5 @@
+cmake ../..
+cd ..
 python3 packer.py
-cmake ..
+cd linux
 cmake --build .
