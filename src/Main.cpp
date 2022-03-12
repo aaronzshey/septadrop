@@ -1,7 +1,14 @@
 #include "packed/textures/icon_texture_data.hpp"
+#include "packed/textures/paused_texture_data.hpp"
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Image.hpp>
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/System/Vector2.hpp>
+#include <SFML/Window/Keyboard.hpp>
 #include <initializer_list>
 #include <iterator>
 #include <math.h>
@@ -85,8 +92,24 @@ int main()
 	bool move_left_immediate = false;
 	bool move_right_immediate = false;
 	bool snap = false;
-	sf::Clock update_clock;
-	sf::Clock move_clock;
+	bool paused = false;
+	bool paused_from_lost_focus = false;
+	sf::Clock update_clock, move_clock, pause_clock;
+	uint pause_offset = 0;
+
+	sf::RectangleShape paused_clear;
+	paused_clear.setFillColor(sf::Color(81, 62, 69));
+
+	sf::Texture paused_texture;
+	paused_texture.loadFromMemory(PAUSED_TEXTURE_DATA, sizeof(PAUSED_TEXTURE_DATA));
+	auto paused_texture_size = paused_texture.getSize();
+
+	sf::Sprite paused_text;
+	paused_text.setTexture(paused_texture);
+	paused_text.setPosition(
+		PLAYFIELD_X + ((float)GRID_WIDTH * TILE_SIZE / 2) - (float)paused_texture_size.x / 2,
+		PLAYFIELD_Y + ((float)GRID_HEIGHT * TILE_SIZE / 2) - (float)paused_texture_size.y / 2
+	);
 
 	// https://stackoverflow.com/a/478088
 	const char *homedir;
@@ -161,6 +184,24 @@ int main()
 	sf::Sound new_highscore_sound;
 	new_highscore_sound.setBuffer(new_highscore_buffer);
 
+	auto toggle_pause = [&] () {
+		paused = !paused;
+		if (paused) {
+			pause_clock.restart();
+			paused_clear.setPosition(sf::Vector2f(PLAYFIELD_X, PLAYFIELD_Y));
+			paused_clear.setSize(sf::Vector2f(GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE));
+			window.draw(paused_clear);
+			auto size = sf::Vector2f(NEXT_WIDTH * TILE_SIZE, NEXT_HEIGHT * TILE_SIZE);
+			paused_clear.setPosition(sf::Vector2f(NEXT_X, NEXT_Y) - size / 2.0f);
+			paused_clear.setSize(size);
+			window.draw(paused_clear);
+			window.draw(paused_text);
+			window.display();
+		} else {
+			pause_offset = pause_clock.getElapsedTime().asMilliseconds();
+		}
+	};
+
 	while (window.isOpen())
 	{
 		sf::Event event;
@@ -170,22 +211,37 @@ int main()
 				case sf::Event::Closed:
 					window.close();
 					break;
+				case sf::Event::GainedFocus:
+					if (paused && paused_from_lost_focus) {
+						toggle_pause();
+						paused_from_lost_focus = false;
+					}
+					break;
+				case sf::Event::LostFocus:
+					if (!paused) {
+						toggle_pause();
+						paused_from_lost_focus = true;
+					}
+					break;
 				case sf::Event::KeyPressed:
 					switch (event.key.code) {
+						case sf::Keyboard::Escape:
+							toggle_pause();
+							break;
 						case sf::Keyboard::Space:
-							snap = true;
+							snap = !paused;
 							break;
 						case sf::Keyboard::Up:
-							rotate = true;
+							rotate = !paused;
 							break;
 						case sf::Keyboard::Left:
-							move_left = true;
-							move_left_immediate = true;
+							move_left = !paused;
+							move_left_immediate = !paused;
 							move_clock.restart();
 							break;
 						case sf::Keyboard::Right:
-							move_right = true;
-							move_right_immediate = true;
+							move_right = !paused;
+							move_right_immediate = !paused;
 							move_clock.restart();
 							break;
 						default:
@@ -208,15 +264,21 @@ int main()
 			}
 		}
 
-		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() > (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ? std::min({update_interval, 125u}) : update_interval);
+		if (paused) {
+			continue;
+		}
+
+		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() - pause_offset > (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ? std::min({update_interval, (uint)MAX_FAST_FORWARD_INTERVAL}) : update_interval);
 		if (is_update_frame) {
 			update_clock.restart();
 		}
 
-		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() > MOVE_FRAME_INTERVAL;
+		bool is_move_frame = move_clock.getElapsedTime().asMilliseconds() - pause_offset > MOVE_FRAME_INTERVAL;
 		if (is_move_frame) {
 			move_clock.restart();
 		}
+
+		pause_offset = 0;
 
 		// Rotation
 		if (rotate) {
@@ -308,8 +370,8 @@ int main()
 		for (auto tile : next_block_tiles) {
 			sprite.setTextureRect(next_block.type->tile_type->texture_rect);
 			sprite.setPosition(
-				370 + (tile.x - next_block.position.x) * TILE_SIZE - x_offset,
-				70 + (tile.y - next_block.position.y) * TILE_SIZE - y_offset
+				NEXT_X + (tile.x - next_block.position.x) * TILE_SIZE - x_offset,
+				NEXT_Y + (tile.y - next_block.position.y) * TILE_SIZE - y_offset
 			);
 			window.draw(sprite);
 		}

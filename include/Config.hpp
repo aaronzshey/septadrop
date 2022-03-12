@@ -9,6 +9,11 @@
 #define PLAYFIELD_X 20
 #define PLAYFIELD_Y 20
 
+#define NEXT_X 370
+#define NEXT_Y 70
+#define NEXT_WIDTH 5
+#define NEXT_HEIGHT 5
+
 #define LINES_PER_LEVEL 5
 #define POINTS_1_LINE 40
 #define POINTS_2_LINES 100
@@ -16,3 +21,4 @@
 #define POINTS_4_LINES 1200
 
 #define MOVE_FRAME_INTERVAL 125
+#define MAX_FAST_FORWARD_INTERVAL 125
