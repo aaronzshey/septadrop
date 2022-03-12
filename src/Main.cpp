@@ -15,7 +15,9 @@
 #include <fstream>
 #include <filesystem>
 #include <unistd.h>
-#include <pwd.h>
+#if __linux__
+	#include <pwd.h>
+#endif
 #include <iostream>
 
 #include <packed/SharedResources.hpp>
@@ -26,11 +28,11 @@
 #include <BlockType.hpp>
 #include <Block.hpp>
 
-uint get_level(int lines) {
+unsigned int get_level(int lines) {
 	return std::min(lines / LINES_PER_LEVEL, 15);
 }
 
-uint get_update_interval(int level) {
+unsigned int get_update_interval(int level) {
 	// From Tetris Worlds, see https://harddrop.com/wiki/Tetris_Worlds#Gravity
 	return pow(0.8 - (level - 1) * 0.007, level - 1) * 1000;
 }
@@ -95,7 +97,7 @@ int main()
 	bool paused = false;
 	bool paused_from_lost_focus = false;
 	sf::Clock update_clock, move_clock, pause_clock;
-	uint pause_offset = 0;
+	unsigned int pause_offset = 0;
 
 	sf::RectangleShape paused_clear;
 	paused_clear.setFillColor(sf::Color(81, 62, 69));
@@ -111,14 +113,17 @@ int main()
 		PLAYFIELD_Y + ((float)GRID_HEIGHT * TILE_SIZE / 2) - (float)paused_texture_size.y / 2
 	);
 
-	// https://stackoverflow.com/a/478088
-	const char *homedir;
-	if ((homedir = getenv("HOME")) == NULL) {
-		homedir = getpwuid(getuid())->pw_dir;
-	}
-
-	std::string highscore_file_path = homedir;
-	highscore_file_path += "/.septadrop";
+	#if __linux__
+		// https://stackoverflow.com/a/478088
+		const char *homedir;
+		if ((homedir = getenv("HOME")) == NULL) {
+			homedir = getpwuid(getuid())->pw_dir;
+		}
+		std::string highscore_file_path = homedir;
+		highscore_file_path += "/.septadrop";
+	#else
+		std::string highscore_file_path = ".septadrop";
+	#endif
 
 	if (!std::filesystem::exists(highscore_file_path)) {
 		std::ofstream highscore_file(highscore_file_path);
@@ -128,19 +133,19 @@ int main()
 	std::fstream highscore_file(highscore_file_path);
 	std::string highscore_string;
 	highscore_file >> highscore_string;
-	uint highscore = std::stoi(highscore_string);
-	uint point_gcd = gcd(POINTS_1_LINE, gcd(POINTS_2_LINES, gcd(POINTS_3_LINES, POINTS_4_LINES)));
+	unsigned int highscore = std::stoi(highscore_string);
+	unsigned int point_gcd = gcd(POINTS_1_LINE, gcd(POINTS_2_LINES, gcd(POINTS_3_LINES, POINTS_4_LINES)));
 	if (highscore % point_gcd != 0) {
 		std::cout << "It seems your system is misconfigured. Please see this guide for fixing the issue: https://www.youtube.com/watch?v=dQw4w9WgXcQ" << std::endl;
 		return 0;
 	}
 
-	uint score = 0;
-	uint lines = 0;
-	uint blocks = 0;
-	uint tiles = 0;
+	unsigned int score = 0;
+	unsigned int lines = 0;
+	unsigned int blocks = 0;
+	unsigned int tiles = 0;
 
-	uint update_interval = get_update_interval(0);
+	unsigned int update_interval = get_update_interval(0);
 
 	// https://sfxr.me/#57uBnWWZeyDTsBRrJsAp2Vwd76cMVrdeRQ7DirNQW5XekKxcrCUNx47Zggh7Uqw4R5FdeUpyk362uhjWmpNHmqxE7JBp3EkxDxfJ1VjzMRpuSHieW6B5iyVFM
 	sf::SoundBuffer rotate_buffer;
@@ -268,7 +273,7 @@ int main()
 			continue;
 		}
 
-		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() - pause_offset > (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ? std::min({update_interval, (uint)MAX_FAST_FORWARD_INTERVAL}) : update_interval);
+		bool is_update_frame = update_clock.getElapsedTime().asMilliseconds() - pause_offset > (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) ? std::min({update_interval, (unsigned int)MAX_FAST_FORWARD_INTERVAL}) : update_interval);
 		if (is_update_frame) {
 			update_clock.restart();
 		}
@@ -365,8 +370,8 @@ int main()
 		auto next_block_tiles = next_block.get_tiles();
 		// This is assuming the next block spawns unrotated.
 		// Refactoring is needed if random rotations are added
-		uint x_offset = next_block.type->width * TILE_SIZE / 2;
-		uint y_offset = (next_block.type->height + next_block.type->starting_line * 2) * TILE_SIZE / 2;
+		unsigned int x_offset = next_block.type->width * TILE_SIZE / 2;
+		unsigned int y_offset = (next_block.type->height + next_block.type->starting_line * 2) * TILE_SIZE / 2;
 		for (auto tile : next_block_tiles) {
 			sprite.setTextureRect(next_block.type->tile_type->texture_rect);
 			sprite.setPosition(
@@ -395,7 +400,7 @@ int main()
 				for (auto tile : block.get_tiles()) {
 					grid[tile.y][tile.x] = block.type->tile_type;
 				}
-				uint cleared_lines = 0;
+				unsigned int cleared_lines = 0;
 				// Check for completed rows
 				for (int y = 0; y < GRID_HEIGHT; y++) {
 					bool completed = true;
@@ -415,7 +420,7 @@ int main()
 					}
 					cleared_lines++;
 				}
-				uint scored;
+				unsigned int scored;
 				switch (cleared_lines) {
 					case 0:
 						scored = 0;

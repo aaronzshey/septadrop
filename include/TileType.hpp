@@ -2,7 +2,7 @@
 
 #include <SFML/Graphics/Rect.hpp>
 
-#include <Config.hpp>
+#include "Config.hpp"
 
 class TileType {
 	public:

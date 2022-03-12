@@ -18,13 +18,13 @@ NumberRenderer::NumberRenderer(
 	}
 }
 
-void NumberRenderer::render(sf::RenderWindow* window, uint number, int x, int y) {
+void NumberRenderer::render(sf::RenderWindow* window, unsigned int number, int x, int y) {
 	auto number_string = std::to_string(number);
 	std::string numeral_string;
 	numeral_string.push_back(number_string.back());
 	auto numeral_rect = numeral_rects[std::stoi(numeral_string)];
 	int x_offset = -numeral_rect.width;
-	uint digits = number_string.length();
+	unsigned int digits = number_string.length();
 	for (int i = digits - 1; i >= 0; i--) {
 		char numeral_string[] = {number_string[i]};
 		auto numeral_rect = numeral_rects[std::stoi(numeral_string)];

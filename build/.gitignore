@@ -3,6 +3,3 @@ cmake_install.cmake
 CMakeCache.txt
 compile_commands.json
 Makefile
-linux/septadrop
-linux/septadrop_1.0_amd64/usr/bin/septadrop
-linux/septadrop_1.0_amd64.deb
