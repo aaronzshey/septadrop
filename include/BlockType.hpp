@@ -7,7 +7,7 @@ class BlockType {
 	public:
 		TileType* tile_type;
 		std::vector<std::vector<bool>> grid;
-		unsigned int  width, height, starting_line;
+		uint width, height, starting_line;
 		bool rotate;
 		BlockType(TileType* _tile_type, const std::vector<std::vector<bool>> _grid, bool _rotate = true);
 

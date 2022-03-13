@@ -12,7 +12,7 @@ class NumberRenderer {
 			sf::IntRect _comma_rect,
 			std::initializer_list<sf::IntRect> _numeral_rects
 		);
-		void render(sf::RenderWindow* window, unsigned int number, int x, int y);
+		void render(sf::RenderWindow* window, uint number, int x, int y);
 	private:
 		sf::Sprite sprite;
 };

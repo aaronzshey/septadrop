@@ -12,7 +12,3 @@ target_include_directories(${ProjectName} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/inc
 
 find_package(SFML 2.5 COMPONENTS system window graphics network audio REQUIRED)
 target_link_libraries(${ProjectName} sfml-graphics sfml-audio)
-
-# Generates compile_commands.json in build folder, which clangd will pick up
-# Without this, clangd might assume the wrong C++ version
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
