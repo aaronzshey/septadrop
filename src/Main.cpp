@@ -283,12 +283,26 @@ int main()
 		if (rotate) {
 			block.rotation_state++;
 			// Check to see if new rotation state is overlapping any tiles
+			int offset_required = 0;
 			for (auto tile : block.get_tiles()) {
-				if (tile.x <= 0 || tile.x >= GRID_WIDTH || grid[tile.y][tile.x]) {
+				if (grid[tile.y][tile.x]) {
+					// Can't wall kick off of blocks
 					block.rotation_state--;
 					break;
 				}
+				if (tile.x <= 0) {
+					int potential_offset = -tile.x;
+					if (potential_offset > abs(offset_required)) {
+						offset_required = potential_offset;
+					}
+				} else if (tile.x >= GRID_WIDTH) {
+					int potential_offset = GRID_WIDTH - tile.x - 1;
+					if (-potential_offset > abs(offset_required)) {
+						offset_required = potential_offset;
+					}
+				}
 			}
+			block.position.x += offset_required;
 			rotate = false;
 			rotate_sound.play();
 		}
