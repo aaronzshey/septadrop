@@ -15,9 +15,7 @@
 #include <fstream>
 #include <filesystem>
 #include <unistd.h>
-#if __linux__
-	#include <pwd.h>
-#endif
+#include <pwd.h>
 #include <iostream>
 
 #include <packed/SharedResources.hpp>
@@ -113,17 +111,13 @@ int main()
 		PLAYFIELD_Y + ((float)GRID_HEIGHT * TILE_SIZE / 2) - (float)paused_texture_size.y / 2
 	);
 
-	#if __linux__
-		// https://stackoverflow.com/a/478088
-		const char *homedir;
-		if ((homedir = getenv("HOME")) == NULL) {
-			homedir = getpwuid(getuid())->pw_dir;
-		}
-		std::string highscore_file_path = homedir;
-		highscore_file_path += "/.septadrop";
-	#else
-		std::string highscore_file_path = ".septadrop";
-	#endif
+	// https://stackoverflow.com/a/478088
+	const char *homedir;
+	if ((homedir = getenv("HOME")) == NULL) {
+		homedir = getpwuid(getuid())->pw_dir;
+	}
+	std::string highscore_file_path = homedir;
+	highscore_file_path += "/.septadrop";
 
 	if (!std::filesystem::exists(highscore_file_path)) {
 		std::ofstream highscore_file(highscore_file_path);
