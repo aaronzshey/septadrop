@@ -401,6 +401,7 @@ int main()
 						grid[y][x] = nullptr;
 					}
 				}
+				update_interval = get_update_interval(0);
 				game_over_sound.play();
 			} else {
 				tiles += block.get_tiles().size();
