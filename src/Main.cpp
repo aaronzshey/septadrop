@@ -264,6 +264,9 @@ int main()
 		}
 
 		if (paused) {
+			// window.display() is where SFML implements frame rate limiting
+			// If we don't run this here, then when paused septadrop will max out the thread
+			window.display();
 			continue;
 		}
 
