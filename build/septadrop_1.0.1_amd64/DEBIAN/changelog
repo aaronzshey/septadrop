@@ -1,0 +1,11 @@
+septadrop (1.0.1) impish; urgency=low
+
+  * Fix performance issue in paused state
+
+ -- ElnuDev <elnu@elnu.com>  Mon, 14 Mar 2022 11:50:09 -0700
+
+septadrop (1.0) impish
+
+  * Initial release
+
+ -- ElnuDev <elnu@elnu.com>  Sun, 13 Mar 2022 13:10:38 -0700
