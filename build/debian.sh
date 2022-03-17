@@ -1,4 +1,4 @@
-TARGET=septadrop_1.0_amd64
+TARGET=septadrop_1.1.0_amd64
 mkdir -p ${TARGET}/usr/bin/
 cd ..
 cargo build --release
