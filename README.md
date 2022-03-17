@@ -2,9 +2,9 @@
 
 ![screenshot](screenshot.png)
 
-A block game made in C++ and [SFML](https://www.sfml-dev.org/).
+A block game made in Rust and [SFML](https://www.sfml-dev.org/).
 
-For build instructions, see the [build folder](build).
+For packaging instructions, see the [build folder](build).
 
 ### Acknowledgements
 
