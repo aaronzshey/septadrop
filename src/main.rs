@@ -57,10 +57,8 @@ fn main() {
     let mut block = random_block();
     let mut next_block = random_block();
 
-    // Default::default() initializes all array cells to None (no block)
-    let mut grid: [[Option<&TileType>; GRID_WIDTH as usize]; GRID_HEIGHT as usize] =
-        Default::default();
-
+    let mut grid = Grid::new();
+    
     let blocks_texture = Texture::from_file(&texture("blocks")).unwrap();
     let mut sprite = Sprite::with_texture(&blocks_texture);
 
@@ -271,7 +269,7 @@ fn main() {
             // Check to see if new rotation state is overlapping any tiles
             let mut offset_required: i32 = 0;
             for tile in block.get_tiles().iter() {
-                if grid[tile.y as usize][tile.x as usize].is_some() {
+                if grid.get(tile.x, tile.y).is_some() {
                     // Can't wall kick off of blocks
                     block.rotation_state -= 1;
                     break;
@@ -306,9 +304,7 @@ fn main() {
             }
             if movement != 0 {
                 for (i, tile) in block.get_tiles().iter().enumerate().rev() {
-                    if tile.x + movement < 0
-                        || tile.x + movement >= GRID_WIDTH as i32
-                        || grid[tile.y as usize][(tile.x + movement) as usize].is_some()
+                    if grid.filled(tile.x + movement, tile.y)
                     {
                         break;
                     }
@@ -334,7 +330,7 @@ fn main() {
             'outer: loop {
                 for tile in block.get_tiles().iter() {
                     let y = tile.y + snap_offset;
-                    if y >= GRID_HEIGHT as i32 || grid[y as usize][tile.x as usize].is_some() {
+                    if grid.filled(tile.x, y) {
                         snap_offset -= 1;
                         break 'outer;
                     }
@@ -352,7 +348,7 @@ fn main() {
             // Land checking
             for tile in block.get_tiles().iter() {
                 if tile.y == GRID_HEIGHT as i32 - 1
-                    || grid[tile.y as usize + 1][tile.x as usize].is_some()
+                    || grid.filled(tile.x, tile.y + 1)
                 {
                     landed = true;
                     break;
@@ -411,13 +407,13 @@ fn main() {
             tiles += block.get_tiles().len() as u32;
             blocks += 1;
             for tile in block.get_tiles().iter() {
-                grid[tile.y as usize][tile.x as usize] = Some(&block.block_type.tile_type);
+                grid.set(tile.x, tile.y, Some(&block.block_type.tile_type));
             }
             let mut cleared_lines = 0;
             for y in 0..GRID_HEIGHT {
                 let mut completed = true;
                 for x in 0..GRID_WIDTH {
-                    if grid[y as usize][x as usize].is_none() {
+                    if !grid.filled(x as i32, y as i32) {
                         completed = false;
                         break;
                     }
@@ -426,10 +422,10 @@ fn main() {
                     continue;
                 }
                 for z in (0..y).rev() {
-                    let z = z as usize;
+                    let z = z as i32;
                     for x in 0..GRID_WIDTH {
-                        let x = x as usize;
-                        grid[z + 1][x] = grid[z][x];
+                        let x = x as i32;
+                        grid.set(x, z + 1, grid.get(x, z));
                     }
                 }
                 cleared_lines += 1;
@@ -466,12 +462,12 @@ fn main() {
                 row_clear_sound.play();
             }
             for tile in next_block.get_tiles().iter() {
-                if grid[tile.y as usize][tile.x as usize].is_some() {
+                if grid.filled(tile.x, tile.y) {
                     score = 0;
                     lines = 0;
                     blocks = 0;
                     tiles = 0;
-                    grid = Default::default(); // reset grid
+                    grid.clear();
                     update_interval = get_update_interval(0);
                     game_over_sound.play();
                     next_block = random_block();
@@ -487,7 +483,7 @@ fn main() {
         // Drawing grid
         for y in 0..GRID_HEIGHT {
             for x in 0..GRID_WIDTH {
-                let tile_type = grid[y as usize][x as usize];
+                let tile_type = grid.get(x as i32, y as i32);
                 if tile_type.is_none() {
                     continue;
                 }
