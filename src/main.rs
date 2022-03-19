@@ -1,9 +1,9 @@
-use sfml::graphics::*;
-use sfml::window::*;
-use sfml::system::*;
-use sfml::audio::*;
-use rand::seq::SliceRandom;
 use gcd::Gcd;
+use rand::seq::SliceRandom;
+use sfml::audio::*;
+use sfml::graphics::*;
+use sfml::system::*;
+use sfml::window::*;
 use std::io::Write;
 
 mod structs;
@@ -35,27 +35,31 @@ fn main() {
         VideoMode::new(WINDOW_WIDTH, WINDOW_HEIGHT, 16),
         "septadrop",
         Style::TITLEBAR | Style::CLOSE,
-        &context_settings
+        &context_settings,
     );
     window.set_framerate_limit(FPS);
     window.set_key_repeat_enabled(false);
 
     let icon = Image::from_file(&texture("icon")).unwrap();
     {
-        let Vector2u { x: width, y: height } = icon.size();
+        let Vector2u {
+            x: width,
+            y: height,
+        } = icon.size();
         window.set_icon(width, height, icon.pixel_data());
     }
 
     let mut thread_rng = rand::thread_rng();
     let block_types = BlockType::init_list();
-    
+
     let mut random_block = || Block::new(block_types.choose(&mut thread_rng).unwrap());
-    
+
     let mut block = random_block();
     let mut next_block = random_block();
 
     // Default::default() initializes all array cells to None (no block)
-    let mut grid: [[Option<&TileType>; GRID_WIDTH as usize]; GRID_HEIGHT as usize] = Default::default();
+    let mut grid: [[Option<&TileType>; GRID_WIDTH as usize]; GRID_HEIGHT as usize] =
+        Default::default();
 
     let blocks_texture = Texture::from_file(&texture("blocks")).unwrap();
     let mut sprite = Sprite::with_texture(&blocks_texture);
@@ -73,8 +77,10 @@ fn main() {
         let mut paused_text = Sprite::with_texture(&paused_texture);
         let paused_texture_size = paused_texture.size();
         paused_text.set_position(Vector2f::new(
-            PLAYFIELD_X as f32 + (GRID_WIDTH as f32 * TILE_SIZE as f32 / 2.0) - paused_texture_size.x as f32 / 2.0,
-            PLAYFIELD_Y as f32 + (GRID_HEIGHT as f32 * TILE_SIZE as f32 / 2.0) - paused_texture_size.y as f32 / 2.0
+            PLAYFIELD_X as f32 + (GRID_WIDTH as f32 * TILE_SIZE as f32 / 2.0)
+                - paused_texture_size.x as f32 / 2.0,
+            PLAYFIELD_Y as f32 + (GRID_HEIGHT as f32 * TILE_SIZE as f32 / 2.0)
+                - paused_texture_size.y as f32 / 2.0,
         ));
         paused_text
     };
@@ -84,7 +90,11 @@ fn main() {
     let mut highscore: u32;
 
     if highscore_file_path.exists() {
-        highscore = std::fs::read_to_string(&highscore_file_path).unwrap().trim().parse::<u32>().unwrap();
+        highscore = std::fs::read_to_string(&highscore_file_path)
+            .unwrap()
+            .trim()
+            .parse::<u32>()
+            .unwrap();
         let point_gcd = POINTS_1_LINE
             .gcd(POINTS_2_LINES)
             .gcd(POINTS_3_LINES)
@@ -152,48 +162,56 @@ fn main() {
                     Event::Closed => {
                         window.close();
                         break;
-                    },
+                    }
                     Event::GainedFocus => {
                         if paused && paused_from_lost_focus {
                             toggle_pause = true;
                         }
-                    },
+                    }
                     Event::LostFocus => {
                         if !paused {
                             toggle_pause = true;
                             paused_from_lost_focus = true;
                         }
-                    },
-                    Event::KeyPressed { code, alt: _, ctrl: _, shift: _, system: _ } => {
-                        match code {
-                            Key::ESCAPE => toggle_pause = true,
-                            Key::SPACE => snap = !paused,
-                            Key::UP => rotate = !paused,
-                            Key::DOWN => fast_forward = !paused,
-                            Key::LEFT => {
-                                move_left = !paused;
-                                move_left_immediate = !paused;
-                                move_clock.restart();
-                            },
-                            Key::RIGHT => {
-                                move_right = !paused;
-                                move_right_immediate = !paused;
-                                move_clock.restart();
-                            }
-                            _ => {}
-                        }
-                    },
-                    Event::KeyReleased { code, alt: _, ctrl: _, shift: _, system: _ } => {
-                        match code {
-                            Key::DOWN => fast_forward = false,
-                            Key::LEFT => move_left = false,
-                            Key::RIGHT => move_right = false,
-                            _ => {}
-                        }
                     }
-                    _ => {},
+                    Event::KeyPressed {
+                        code,
+                        alt: _,
+                        ctrl: _,
+                        shift: _,
+                        system: _,
+                    } => match code {
+                        Key::ESCAPE => toggle_pause = true,
+                        Key::SPACE => snap = !paused,
+                        Key::UP => rotate = !paused,
+                        Key::DOWN => fast_forward = !paused,
+                        Key::LEFT => {
+                            move_left = !paused;
+                            move_left_immediate = !paused;
+                            move_clock.restart();
+                        }
+                        Key::RIGHT => {
+                            move_right = !paused;
+                            move_right_immediate = !paused;
+                            move_clock.restart();
+                        }
+                        _ => {}
+                    },
+                    Event::KeyReleased {
+                        code,
+                        alt: _,
+                        ctrl: _,
+                        shift: _,
+                        system: _,
+                    } => match code {
+                        Key::DOWN => fast_forward = false,
+                        Key::LEFT => move_left = false,
+                        Key::RIGHT => move_right = false,
+                        _ => {}
+                    },
+                    _ => {}
                 },
-                None => break
+                None => break,
             }
         }
 
@@ -201,23 +219,17 @@ fn main() {
             paused = !paused;
             if paused {
                 pause_clock.restart();
-                paused_clear.set_position(Vector2f::new(
-                    PLAYFIELD_X as f32,
-                    PLAYFIELD_Y as f32
-                ));
+                paused_clear.set_position(Vector2f::new(PLAYFIELD_X as f32, PLAYFIELD_Y as f32));
                 paused_clear.set_size(Vector2f::new(
                     (GRID_WIDTH * TILE_SIZE) as f32,
-                    (GRID_HEIGHT * TILE_SIZE) as f32
+                    (GRID_HEIGHT * TILE_SIZE) as f32,
                 ));
                 window.draw(&paused_clear);
                 let size = Vector2f::new(
                     (NEXT_WIDTH * TILE_SIZE) as f32,
-                    (NEXT_HEIGHT * TILE_SIZE) as f32
+                    (NEXT_HEIGHT * TILE_SIZE) as f32,
                 );
-                paused_clear.set_position(Vector2f::new(
-                    NEXT_X as f32,
-                    NEXT_Y as f32
-                ) - size / 2.0);
+                paused_clear.set_position(Vector2f::new(NEXT_X as f32, NEXT_Y as f32) - size / 2.0);
                 paused_clear.set_size(size);
                 window.draw(&paused_clear);
                 window.draw(&paused_text);
@@ -235,9 +247,8 @@ fn main() {
             continue;
         }
 
-        let is_update_frame =
-            update_clock.elapsed_time().as_milliseconds() - pause_offset as i32 >
-            if fast_forward {
+        let is_update_frame = update_clock.elapsed_time().as_milliseconds() - pause_offset as i32
+            > if fast_forward {
                 std::cmp::min(update_interval, MAX_FAST_FORWARD_INTERVAL)
             } else {
                 update_interval
@@ -245,10 +256,9 @@ fn main() {
         if is_update_frame {
             update_clock.restart();
         }
-        
-        let is_move_frame =
-            move_clock.elapsed_time().as_milliseconds() - pause_offset as i32 >
-            MOVE_FRAME_INTERVAL as i32;
+
+        let is_move_frame = move_clock.elapsed_time().as_milliseconds() - pause_offset as i32
+            > MOVE_FRAME_INTERVAL as i32;
         if is_move_frame {
             move_clock.restart();
         }
@@ -296,7 +306,10 @@ fn main() {
             }
             if movement != 0 {
                 for (i, tile) in block.get_tiles().iter().enumerate().rev() {
-                    if tile.x + movement < 0 || tile.x + movement >= GRID_WIDTH as i32 || grid[tile.y as usize][(tile.x + movement) as usize].is_some() {
+                    if tile.x + movement < 0
+                        || tile.x + movement >= GRID_WIDTH as i32
+                        || grid[tile.y as usize][(tile.x + movement) as usize].is_some()
+                    {
                         break;
                     }
                     if i == 0 {
@@ -335,9 +348,12 @@ fn main() {
             block.position.y += snap_offset;
             snap = false;
             snap_sound.play();
-        } else if is_update_frame { // Land checking
+        } else if is_update_frame {
+            // Land checking
             for tile in block.get_tiles().iter() {
-                if tile.y == GRID_HEIGHT as i32 - 1 || grid[tile.y as usize + 1][tile.x as usize].is_some() {
+                if tile.y == GRID_HEIGHT as i32 - 1
+                    || grid[tile.y as usize + 1][tile.x as usize].is_some()
+                {
                     landed = true;
                     break;
                 }
@@ -345,10 +361,10 @@ fn main() {
         }
         let landed = landed; // remove mutability
 
-		// Clear window
-		// Normally, one would run window.clear(),
-		// but the background image covers the entire window.
-		window.draw(&background);
+        // Clear window
+        // Normally, one would run window.clear(),
+        // but the background image covers the entire window.
+        window.draw(&background);
 
         // Draw block
         if !landed {
@@ -357,13 +373,13 @@ fn main() {
                 sprite.set_texture_rect(&block.block_type.tile_type.texture_rect);
                 sprite.set_position(Vector2f::new(
                     (PLAYFIELD_X as i32 + tile.x * TILE_SIZE as i32) as f32,
-                    (PLAYFIELD_Y as i32 + tile.y * TILE_SIZE as i32) as f32
+                    (PLAYFIELD_Y as i32 + tile.y * TILE_SIZE as i32) as f32,
                 ));
                 window.draw(&sprite);
                 sprite.set_texture_rect(&block.block_type.tile_type.ghost_texture_rect);
                 sprite.set_position(Vector2f::new(
                     (PLAYFIELD_X as i32 + tile.x * TILE_SIZE as i32) as f32,
-                    (PLAYFIELD_Y as i32 + snap_y * TILE_SIZE as i32) as f32
+                    (PLAYFIELD_Y as i32 + snap_y * TILE_SIZE as i32) as f32,
                 ));
                 window.draw(&sprite);
             }
@@ -375,12 +391,16 @@ fn main() {
             // This is assuming the next block spawns unrotated.
             // Refactoring is needed if random rotations are added
             let x_offset = next_block.block_type.width * TILE_SIZE / 2;
-            let y_offset = (next_block.block_type.height + next_block.block_type.starting_line * 2) * TILE_SIZE / 2;
+            let y_offset = (next_block.block_type.height + next_block.block_type.starting_line * 2)
+                * TILE_SIZE
+                / 2;
             for tile in next_block_tiles.iter() {
                 sprite.set_texture_rect(&next_block.block_type.tile_type.texture_rect);
                 sprite.set_position(Vector2f::new(
-                    (NEXT_X + (tile.x - next_block.position.x) as u32 * TILE_SIZE - x_offset) as f32,
-                    (NEXT_Y + (tile.y - next_block.position.y) as u32 * TILE_SIZE - y_offset) as f32
+                    (NEXT_X + (tile.x - next_block.position.x) as u32 * TILE_SIZE - x_offset)
+                        as f32,
+                    (NEXT_Y + (tile.y - next_block.position.y) as u32 * TILE_SIZE - y_offset)
+                        as f32,
                 ));
                 window.draw(&sprite);
             }
@@ -419,7 +439,7 @@ fn main() {
                 1 => POINTS_1_LINE,
                 2 => POINTS_2_LINES,
                 3 => POINTS_3_LINES,
-                _ => POINTS_4_LINES
+                _ => POINTS_4_LINES,
             };
             if scored > 0 {
                 let level = get_level(lines);
@@ -475,7 +495,7 @@ fn main() {
                 sprite.set_texture_rect(&tile_type.texture_rect);
                 sprite.set_position(Vector2f::new(
                     (PLAYFIELD_X + x * TILE_SIZE) as f32,
-                    (PLAYFIELD_Y + y * TILE_SIZE) as f32
+                    (PLAYFIELD_Y + y * TILE_SIZE) as f32,
                 ));
                 window.draw(&sprite);
             }
