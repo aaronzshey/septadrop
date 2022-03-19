@@ -3,6 +3,7 @@ Version: 1.1.0
 Architecture: amd64
 Essential: no
 Priority: optional
+Depends: libcsfml-graphics2.5,libcsfml-audio2.5,libcsfml-system2.5
 Maintainer: ElnuDev <elnu@elnu.com>
 Description: A block game made in Rust and SFML.
 Homepage: https://github.com/ElnuDev/septadrop
