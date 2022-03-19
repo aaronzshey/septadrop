@@ -1,3 +1,8 @@
+septadrop (1.1.0) impish; urgency=low
+
+  * Rewrite in Rust
+  * Prevent block overlapping at top of screen; immediate game over
+
 septadrop (1.0.1) impish; urgency=low
 
   * Fix performance issue in paused state
