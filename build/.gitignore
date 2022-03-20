@@ -1,3 +1,5 @@
 septadrop
 *.deb
 DEBIAN/usr/games/septadrop
+windows
+upx.exe

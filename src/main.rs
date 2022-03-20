@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use gcd::Gcd;
 use rand::seq::SliceRandom;
 use sfml::audio::*;
